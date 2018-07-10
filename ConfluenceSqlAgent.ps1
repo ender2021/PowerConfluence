@@ -1,5 +1,5 @@
 Import-Module .\PowerConfluence.psm1 -Force
-Import-Module .\ConfluenceCredentials.psm1 -Force
+Import-Module .\Credentials.psm1 -Force
 
 ###########################
 # useful string libraries #
