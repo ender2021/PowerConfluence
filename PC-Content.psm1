@@ -2,6 +2,29 @@
 # useful string libraries #
 ###########################
 
+$PC_ConfluenceEmoticons = @{
+    Smile="smile"
+    Sad="sad"
+    Cheeky="cheeky"
+    Laugh="laugh"
+    Wink="wink"
+    ThumbsUp="thumbs-up"
+    ThumbsDown="thumbs-down"
+    Info="information"
+    Tick="tick"
+    Cross="cross"
+    Warning="warning"
+    Plus="plus"
+    Minus="minus"
+    Question="question"
+    BulbOn="light-on"
+    BulbOff="light-off"
+    StarYellow="yellow-star"
+    StarRed="red-star"
+    StarGreen="green-star"
+    StarBlue="blue-star"
+}
+
 $PC_ConfluenceTemplates = @{
     Layout = @{
         LayoutTemplate = '<ac:layout>{0}</ac:layout>'
@@ -19,6 +42,8 @@ $PC_ConfluenceTemplates = @{
         DateTemplate = '<div class="content-wrapper"><time datetime="{0}" />&nbsp;</div>'
         IconTemplate = '<ac:emoticon ac:name="{0}" />'
         PageLinkTemplate = '<ac:link><ri:page ri:content-title="{0}" /><ac:plain-text-link-body><![CDATA[{1}]]></ac:plain-text-link-body></ac:link>'
+        TaskList = '<ac:task-list>{0}</ac:task-list>'
+        Task = '<ac:task><ac:task-id>{0}</ac:task-id><ac:task-status>{1}</ac:task-status><ac:task-body><span class="placeholder-inline-tasks">{2}</span></ac:task-body></ac:task>'
     }
     Html = @{
         RelativeTable = '<table class="relative-table"><tbody>{0}</tbody></table>'
@@ -29,29 +54,60 @@ $PC_ConfluenceMacros = @{
     Note = @{
         Name = "note"
         SchemaVersion = "1"
-        ID = "2ce6d469-47d0-432c-a63d-88460de465cc"
+        Parameters = @{
+            title=@{Default="";Required=$true}
+            icon=@{Default=$true;Required=$false}
+        }
+        RichTextBody=$true
     }
     Tip = @{
         Name = "tip"
         SchemaVersion = "1"
-        ID = "cd81b82e-268c-47c2-ae41-a81a266f04ff"
+        Parameters = @{
+            title=@{Default="";Required=$true}
+            icon=@{Default=$true;Required=$false}
+        }
+        RichTextBody=$true
     }
     Info = @{
         Name = "info"
         SchemaVersion = "1"
-        ID = "ff3ceaa7-9121-4091-91ed-07131dea988f"
+        Parameters = @{
+            title=@{Default="";Required=$true}
+            icon=@{Default=$true;Required=$false}
+        }
+        RichTextBody=$true
     }
     PageProperties = @{
         Name = "details"
         SchemaVersion = "1"
-        ID = "4d43041c-1fb8-4349-90ca-7f30400b5d35"
+        Parameters = @{}
+        RichTextBody=$true
     }
     PagePropertiesReport = @{
         Name = "detailssummary"
         SchemaVersion = "2"
-        ID = "672a064c-4705-4b13-94a6-c4699cae8c24"
+        Parameters = @{
+            firstcolumn=@{Default="";Required=$false}
+            subtle=@{Default="";Required=$false}
+            headings=@{Default="";Required=$false}
+            sortBy=@{Default="";Required=$false}
+            cql=@{Default="";Required=$true}
+            pageSize=@{Default="30";Required=$true}
+        }
+        RichTextBody=$false
     }
-    
+    Status = @{
+        Name = "status"
+        SchemaVersion = 1
+        Parameters = @{
+            colour=@{Default="";Required=$true}
+            title=@{Default="";Required=$true}
+            subtle=@{Default=$false;Required=$false}
+        }
+        RichTextBody=$false
+        Colors = @("Green","Blue","Yellow","Red","Grey")
+    }
 }
 
 ########################################
@@ -72,7 +128,7 @@ function Format-ConfluenceHtmlTableRow($Cells) {
     "<tr>$cellTags</tr>"
 }
 
-function Format-ConfluenceMacro($Name,$SchemaVersion,$ID,$Contents) {
+function Format-ConfluenceMacro($Name,$SchemaVersion,$Contents) {
     $PC_ConfluenceTemplates.Macro.MacroTemplate -f $Name,$SchemaVersion,"$Contents"
 }
 
@@ -98,7 +154,7 @@ function Format-ConfluencePagePropertiesReportMacro($Cql,$PageSize,$FirstColumn=
     if ($SortBy -ne "") {$params.Add("sortBy",$SortBy)}
 	
     $macro = $PC_ConfluenceMacros.PagePropertiesReport
-    Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -ID $macro.ID -Contents (Format-ConfluenceMacroParameters -Parameters $params)
+    Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents (Format-ConfluenceMacroParameters -Parameters $params)
 }
 
 function Format-ConfluenceLayout($Contents) {
@@ -133,7 +189,7 @@ function Format-ConfluenceDefaultUserSection() {
     $macroContents = @()
     $macroContents += (Format-ConfluenceMacroParameters -Parameters @{title="Editable Section"})
     $macroContents += (Format-ConfluenceMacroRichTextBody -Content (Format-ConfluenceHtml -Tag "p" -Contents "You may edit anything below this panel!"))
-    $sectionContents += (Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -ID $macro.ID -Contents $macroContents)
+    $sectionContents += (Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents $macroContents)
     
     # section body
     $sectionContents += (Format-ConfluenceHtml -Tag "p" -Contents "No notes yet!")
@@ -146,7 +202,7 @@ function Format-AutomationWarning() {
     $param = Format-ConfluenceMacroParameters -Parameters @{title="Automated Documentation"}
     $body = Format-ConfluenceMacroRichTextBody -Content (Format-ConfluenceHtml -Tag "p" -Contents "This page is automatically generated.&nbsp; Do not edit anything other than the marked section, or your changes may be lost!")
     $macro = $PC_ConfluenceMacros.Note
-    Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -ID $macro.ID -Contents "$param$body"
+    Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents "$param$body"
 }
 
 function Format-ConfluencePageBase($GeneratedContent, $UserSection) {

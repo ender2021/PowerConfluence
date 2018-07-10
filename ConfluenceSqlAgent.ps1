@@ -175,7 +175,7 @@ function Format-SqlAgentJobManifestConfluencePage($SchedulePageTitle="", $UserSe
     $macroParameters = Format-ConfluenceMacroParameters -Parameters @{title=$_sqlAgentJobManifestConfiguration.InfoMacro.Title}
     $link = Format-ConfluencePageLink -TargetPageTitle $SchedulePageTitle -LinkText $_sqlAgentJobManifestConfiguration.InfoMacro.LinkText
     $macroBody = Format-ConfluenceMacroRichTextBody -Content (Format-ConfluenceHtml -Tag "p" -Contents ($_sqlAgentJobManifestConfiguration.InfoMacro.BodyTemplate -f $link))
-    $pageContents += Format-ConfluenceMacro -Name $infoMacro.Name -SchemaVersion $infoMacro.SchemaVersion -ID $infoMacro.ID -Contents ($macroParameters + $macroBody)
+    $pageContents += Format-ConfluenceMacro -Name $infoMacro.Name -SchemaVersion $infoMacro.SchemaVersion -Contents ($macroParameters + $macroBody)
     
     # add the page properties report
     $pageContents += Format-ConfluenceHtml -Tag "h1" -Contents $_sqlAgentJobManifestConfiguration.PagePropertiesMacro.Title
@@ -238,9 +238,9 @@ function Format-SqlAgentScheduleSummaryConfluencePage($Schedules, $UserSection=(
     foreach ($schedule in $Schedules) {
         $cells = @(
                 @{Type="td";Contents=(Format-ConfluencePageLink -TargetPageTitle $schedule.Parent -LinkText $schedule.Parent)},
-                @{Type="td";Contents=(Format-ConfluenceIcon -IconName (&{If($schedule.JobEnabled) {"tick"} Else {"cross"}}));Center=$true},
+                @{Type="td";Contents=(Format-ConfluenceIcon -IconName (&{If($schedule.JobEnabled) {$PC_ConfluenceEmoticons.Tick} Else {$PC_ConfluenceEmoticons.Cross}}));Center=$true},
                 @{Type="td";Contents=$schedule.Name},
-                @{Type="td";Contents=(Format-ConfluenceIcon -IconName (&{If($schedule.IsEnabled) {"tick"} Else {"cross"}}));Center=$true},
+                @{Type="td";Contents=(Format-ConfluenceIcon -IconName (&{If($schedule.IsEnabled) {$PC_ConfluenceEmoticons.Tick} Else {$PC_ConfluenceEmoticons.Cross}}));Center=$true},
                 @{Type="td";Contents=$schedule.FrequencyTranslation},
                 @{Type="td";Contents=$schedule.StartTimeTranslation}
             )
@@ -296,7 +296,7 @@ function Format-SqlAgentJobConfluencePageProperties($SqlAgentJob) {
     $properties = @(
         @{"SQL Agent Job Name" = $SqlAgentJob.Name}
         @{Description = (&{if($SqlAgentJob.Description -ne ""){[System.Net.WebUtility]::HtmlEncode($SqlAgentJob.Description)}else{"N/A"}})},
-        @{Enabled = Format-ConfluenceIcon -IconName (&{If($SqlAgentJob.IsEnabled) {"tick"} Else {"cross"}})},
+        @{Enabled = Format-ConfluenceIcon -IconName (&{If($SqlAgentJob.IsEnabled) {$PC_ConfluenceEmoticons.Tick} Else {$PC_ConfluenceEmoticons.Cross}})},
         @{Schedules = ($SqlAgentJob|Get-SqlAgentJobSchedule|Measure-Object).Count},
         @{Steps = ($SqlAgentJob|Get-SqlAgentJobStep|Measure-Object).Count},
         @{Owner = $SqlAgentJob.OwnerLoginName},
@@ -325,7 +325,7 @@ function Format-SqlAgentJobConfluencePageSchedules($SqlAgentJob) {
     foreach ($schedule in $schedules) {
         $cells = @(
             @{Type="td";Contents=$schedule.Name},
-            @{Type="td";Contents=(Format-ConfluenceIcon -IconName (&{If($schedule.IsEnabled) {"tick"} Else {"cross"}}))},
+            @{Type="td";Contents=(Format-ConfluenceIcon -IconName (&{If($schedule.IsEnabled) {$PC_ConfluenceEmoticons.Tick} Else {$PC_ConfluenceEmoticons.Cross}}))},
             @{Type="td";Contents=$schedule.FrequencyTranslation},
             @{Type="td";Contents=$schedule.StartTimeTranslation},
             @{Type="td";Contents=Format-ConfluenceDate($schedule.ActiveStartDate)}
