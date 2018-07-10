@@ -1,4 +1,3 @@
 
-ConfluenceCredentials.psm1
-verbs.txt
-SSISTasks.ps1
+demos/Credentials.psm1
+demos/SSISTasks.ps1
