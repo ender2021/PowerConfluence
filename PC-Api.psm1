@@ -2,6 +2,10 @@
 # basic Confluence posting support #
 ####################################
 
+function Format-ConfluenceApiFunctionAddress($Address) {
+    (&{If($Address.StartsWith("/")) {$Address.Substring(1)} else {$Address}})
+}
+
 function Send-ConfluenceRestRequest($ConfluenceConnection,$FunctionAddress,$HttpMethod,$Headers=@{},$Body) {
     
     $sendHeaders = @{}
@@ -17,10 +21,6 @@ function Send-ConfluenceRestRequest($ConfluenceConnection,$FunctionAddress,$Http
     } else {
         Invoke-RestMethod -Uri $url -Method $HttpMethod -ContentType 'application/json' -Headers $sendHeaders
     }
-}
-
-function Format-ConfluenceApiFunctionAddress($Address) {
-    (&{If($Address.StartsWith("/")) {$Address.Substring(1)} else {$Address}})
 }
 
 function Add-ConfluencePage ($ConfluenceConnection,$SpaceKey,$AncestorID = -1,$Title,$Contents) {
@@ -113,18 +113,6 @@ function Get-ConfluencePage ($ConfluenceConnection,$PageID,$SpaceKey,$Title,$Exp
         # no matter what happens, return something
         $results    
     }
-}
-
-function Get-ConfluenceUserContent($TemplateContent,$UserContentSectionIndex = 1) {
-    # use the supplied parameter to determine the location of the user content
-    # split the TemplateContent in two parts - before the start of the user content (throw away), and after (keep)
-    $userContent = $TemplateContent.Substring(([regex]::Matches($TemplateContent, $_confluenceTemplates.Layout.SectionStart))[$UserContentSectionIndex].Index)
-
-    # take the piece that starts with the user content and chop off anything after the end of the user content (aka, the first Confluence Section end)
-    $userContent = $userContent.Substring(0, ([regex]::Matches($userContent, $_confluenceTemplates.Layout.SectionEnd))[0].Index + $_confluenceTemplates.Layout.SectionEnd.Length)
-    
-    # return
-    $userContent
 }
 
 function Get-ConfluenceConnection($UserName,$ApiToken,$HostName) {

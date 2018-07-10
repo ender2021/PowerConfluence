@@ -21,10 +21,12 @@ $_sqlAgentJobManifestConfiguration = @{
     }
 }
 
+<#
 $_integrationServicesPackageTemplateStrings = @{
     ExecutionsTableStart = '<h1>Execution(s)</h1><table class="relative-table"><tbody><tr><th>ID</th><th>Completed</th><th>Status</th><th>Start Time</th><th>End Time</th><th>Duration</th></tr>';
     ExecutionsTableEnd = '</tbody></table>';
 }
+#>
 
 $_pageLabels = @{
     SqlAgentJob = 'sql-agent-job'
@@ -172,11 +174,11 @@ function Format-SqlAgentJobManifestConfluencePage($SchedulePageTitle="", $UserSe
     $infoMacro = $PC_ConfluenceMacros.Info
     $macroParameters = Format-ConfluenceMacroParameters -Parameters @{title=$_sqlAgentJobManifestConfiguration.InfoMacro.Title}
     $link = Format-ConfluencePageLink -TargetPageTitle $SchedulePageTitle -LinkText $_sqlAgentJobManifestConfiguration.InfoMacro.LinkText
-    $macroBody = Format-ConfluenceMacroRichTextBody -Content (Format-SimpleHtml -Tag "p" -Contents ($_sqlAgentJobManifestConfiguration.InfoMacro.BodyTemplate -f $link))
+    $macroBody = Format-ConfluenceMacroRichTextBody -Content (Format-ConfluenceHtml -Tag "p" -Contents ($_sqlAgentJobManifestConfiguration.InfoMacro.BodyTemplate -f $link))
     $pageContents += Format-ConfluenceMacro -Name $infoMacro.Name -SchemaVersion $infoMacro.SchemaVersion -ID $infoMacro.ID -Contents ($macroParameters + $macroBody)
     
     # add the page properties report
-    $pageContents += Format-SimpleHtml -Tag "h1" -Contents $_sqlAgentJobManifestConfiguration.PagePropertiesMacro.Title
+    $pageContents += Format-ConfluenceHtml -Tag "h1" -Contents $_sqlAgentJobManifestConfiguration.PagePropertiesMacro.Title
     $pageContents += Format-ConfluencePagePropertiesReportMacro -Cql $_sqlAgentJobManifestConfiguration.PagePropertiesMacro.Cql -PageSize $_sqlAgentJobManifestConfiguration.PagePropertiesMacro.PageSize -FirstColumn $_sqlAgentJobManifestConfiguration.PagePropertiesMacro.FirstColumn -Headings $_sqlAgentJobManifestConfiguration.PagePropertiesMacro.Headings -SortBy $_sqlAgentJobManifestConfiguration.PagePropertiesMacro.SortBy
     
     # done!
@@ -230,7 +232,7 @@ function Format-SqlAgentScheduleSummaryConfluencePage($Schedules, $UserSection=(
         @{Type="th";Contents="Execution Frequency"},
         @{Type="th";Contents="Execution Time"}
     )    
-    $rows += Format-HtmlTableRow -Cells $headerCells
+    $rows += Format-ConfluenceHtmlTableRow -Cells $headerCells
 
     # build out the schedule rows
     foreach ($schedule in $Schedules) {
@@ -242,12 +244,12 @@ function Format-SqlAgentScheduleSummaryConfluencePage($Schedules, $UserSection=(
                 @{Type="td";Contents=$schedule.FrequencyTranslation},
                 @{Type="td";Contents=$schedule.StartTimeTranslation}
             )
-        $rows += Format-HtmlTableRow -Cells $cells
+        $rows += Format-ConfluenceHtmlTableRow -Cells $cells
     }
     
     # pull it all together
-    $title = Format-SimpleHtml -Tag "h1" -Contents "SQL Agent Job Schedule Summary"    
-    $table = Format-HtmlTable -Rows $rows
+    $title = Format-ConfluenceHtml -Tag "h1" -Contents "SQL Agent Job Schedule Summary"    
+    $table = Format-ConfluenceHtmlTable -Rows $rows
     
     # return
     Format-ConfluencePageBase -GeneratedContent ($title + $table) -UserSection $UserSection    
@@ -316,7 +318,7 @@ function Format-SqlAgentJobConfluencePageSchedules($SqlAgentJob) {
         @{Type="th";Contents="Activation Date"},
         @{Type="th";Contents="Date Created"}
     )    
-    $rows += Format-HtmlTableRow -Cells $headerCells
+    $rows += Format-ConfluenceHtmlTableRow -Cells $headerCells
 
     # create the schedule rows
     $schedules = $SqlAgentJob | Get-SqlAgentJobScheduleWithTranslation
@@ -329,11 +331,11 @@ function Format-SqlAgentJobConfluencePageSchedules($SqlAgentJob) {
             @{Type="td";Contents=Format-ConfluenceDate($schedule.ActiveStartDate)}
             @{Type="td";Contents=Format-ConfluenceDate($schedule.DateCreated)}
         )
-        $rows += Format-HtmlTableRow -Cells $cells
+        $rows += Format-ConfluenceHtmlTableRow -Cells $cells
     }
 
     # return the title and the table
-    (Format-SimpleHtml -Tag "h1" -Contents "Schedule(s)") + (Format-HtmlTable -Rows $rows)
+    (Format-ConfluenceHtml -Tag "h1" -Contents "Schedule(s)") + (Format-ConfluenceHtmlTable -Rows $rows)
 }
 
 function Format-SqlAgentJobConfluencePageSteps($SqlAgentJob) {
@@ -349,7 +351,7 @@ function Format-SqlAgentJobConfluencePageSteps($SqlAgentJob) {
         @{Type="th";Contents="On Fail"},
         @{Type="th";Contents="On Success"}
     )    
-    $rows += Format-HtmlTableRow -Cells $headerCells
+    $rows += Format-ConfluenceHtmlTableRow -Cells $headerCells
 
     # create the step rows
     $steps = $SqlAgentJob | Get-SqlAgentJobStep
@@ -372,13 +374,13 @@ function Format-SqlAgentJobConfluencePageSteps($SqlAgentJob) {
         )
 
         # render the row and add it to the list
-        $rows += Format-HtmlTableRow -Cells $cells
+        $rows += Format-ConfluenceHtmlTableRow -Cells $cells
     }
 
     # build the return string
-    $header = Format-SimpleHtml -Tag "h1" -Contents "Step(s)"
-    $note = Format-SimpleHtml -Tag "p" -Contents ((Format-ConfluenceIcon -IconName "yellow-star") + "&nbsp;= First Step")
-    $table = Format-HtmlTable -Rows $rows
+    $header = Format-ConfluenceHtml -Tag "h1" -Contents "Step(s)"
+    $note = Format-ConfluenceHtml -Tag "p" -Contents ((Format-ConfluenceIcon -IconName "yellow-star") + "&nbsp;= First Step")
+    $table = Format-ConfluenceHtmlTable -Rows $rows
 
     # return
     "$header$note$table"
@@ -446,14 +448,14 @@ function Publish-SqlAgentJobConfluencePage($ConfluenceConnection,$SqlAgentJob,$S
 #########################
 
 $ConfluenceConnection = Get-ConfluenceConnection -UserName $Credentials.UserName -ApiToken $Credentials.ApiToken -HostName $Credentials.HostName
-$SqlAgentServerDev = $Credentials.SqlAgentServerDev
+# $SqlAgentServerDev = $Credentials.SqlAgentServerDev
 $spaceKey = "GDIS"
 
 ########################################
 # refresh a full SqlAgentJob manifest  #
 ########################################
 
-
+<#
 $scheduleTitle = "Job Schedule - GradDiv DEV Jobs"
 
 $manifest = Publish-SqlAgentJobManifestConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -PageTitle "SQL Agent Jobs - GradDiv DEV" -SchedulePageTitle $scheduleTitle

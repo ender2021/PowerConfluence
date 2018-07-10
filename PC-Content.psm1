@@ -58,6 +58,36 @@ $PC_ConfluenceMacros = @{
 # Confluence content rendering support #
 ########################################
 
+function Format-ConfluenceHtml($Tag,$Contents="") {
+    (&{if($Contents -ne ""){"<$Tag>$Contents</$Tag>"}else{"<$Tag />"}})
+}
+
+function Format-ConfluenceHtmlTable($Rows) {
+    $PC_ConfluenceTemplates.Html.RelativeTable -f "$Rows"
+}
+
+function Format-ConfluenceHtmlTableRow($Cells) {
+    $cellTags = @()
+    foreach ($cell in $Cells) {$cellTags += "<{0}{2}>{1}</{0}>" -f (""+$cell.Type),(""+$cell.Contents),(&{if($cell.Center){' style="text-align: center;"'}else{''}})}
+    "<tr>$cellTags</tr>"
+}
+
+function Format-ConfluenceMacro($Name,$SchemaVersion,$ID,$Contents) {
+    $PC_ConfluenceTemplates.Macro.MacroTemplate -f $Name,$SchemaVersion,"$Contents"
+}
+
+function Format-ConfluenceMacroParameters($Parameters=@{}) {
+    $toReturn = @()
+    foreach($key in $Parameters.Keys) {
+        $toReturn += $PC_ConfluenceTemplates.Macro.ParameterTemplate -f $key,$Parameters.Item($key)
+    }
+    $toReturn
+}
+
+function Format-ConfluenceMacroRichTextBody($Content) {
+    $PC_ConfluenceTemplates.Macro.RichTextBodyTemplate -f "$Content"
+}
+
 function Format-ConfluencePagePropertiesReportMacro($Cql,$PageSize,$FirstColumn="",$Headings="",$SortBy="") {
     $params = @{
         cql = $Cql
@@ -79,20 +109,6 @@ function Format-ConfluenceSection($Contents,$Type=$PC_ConfluenceTemplates.Layout
     $PC_ConfluenceTemplates.Layout.SectionTemplate -f "$Type","$Contents"
 }
 
-function Format-ConfluenceMacro($Name,$SchemaVersion,$ID,$Contents) {
-    $PC_ConfluenceTemplates.Macro.MacroTemplate -f $Name,$SchemaVersion,"$Contents"
-}
-
-function Format-ConfluenceMacroParameters($Parameters=@{}) {
-    $toReturn = @()
-    $Parameters.Keys | ForEach-Object -Process {$toReturn += $PC_ConfluenceTemplates.Macro.ParameterTemplate -f $_,$Parameters.Item($_)}
-    $toReturn
-}
-
-function Format-ConfluenceMacroRichTextBody($Content) {
-    $PC_ConfluenceTemplates.Macro.RichTextBodyTemplate -f "$Content"
-}
-
 function Format-ConfluenceDate($DateTime) {
     $PC_ConfluenceTemplates.Formatting.DateTemplate -f $DateTime.ToString("yyyy-MM-dd")
 }
@@ -110,61 +126,59 @@ function Format-ConfluenceDefaultUserSection() {
     $sectionContents = @()
     
     # section header
-    $sectionContents += (Format-SimpleHtml -Tag "h1" -Contents "Additional Notes")
+    $sectionContents += (Format-ConfluenceHtml -Tag "h1" -Contents "Additional Notes")
     
     # build the tip macro
     $macro = $PC_ConfluenceMacros.Tip
     $macroContents = @()
     $macroContents += (Format-ConfluenceMacroParameters -Parameters @{title="Editable Section"})
-    $macroContents += (Format-ConfluenceMacroRichTextBody -Content (Format-SimpleHtml -Tag "p" -Contents "You may edit anything below this panel!"))
+    $macroContents += (Format-ConfluenceMacroRichTextBody -Content (Format-ConfluenceHtml -Tag "p" -Contents "You may edit anything below this panel!"))
     $sectionContents += (Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -ID $macro.ID -Contents $macroContents)
     
     # section body
-    $sectionContents += (Format-SimpleHtml -Tag "p" -Contents "No notes yet!")
+    $sectionContents += (Format-ConfluenceHtml -Tag "p" -Contents "No notes yet!")
     
     # done
     Format-ConfluenceSection -Contents $sectionContents
 }
-Format-ConfluenceDefaultUserSection
-function Format-SimpleHtml($Tag,$Contents="") {
-    (&{if($Contents -ne ""){"<$Tag>$Contents</$Tag>"}else{"<$Tag />"}})
-}
-
-function Format-HtmlTable($Rows) {
-    $PC_ConfluenceTemplates.Html.RelativeTable -f "$Rows"
-}
-
-function Format-HtmlTableRow($Cells) {
-    $cellTags = @()
-    foreach ($cell in $Cells) {$cellTags += "<{0}{2}>{1}</{0}>" -f (""+$cell.Type),(""+$cell.Contents),(&{if($cell.Center){' style="text-align: center;"'}else{''}})}
-    "<tr>$cellTags</tr>"
-}
 
 function Format-AutomationWarning() {
     $param = Format-ConfluenceMacroParameters -Parameters @{title="Automated Documentation"}
-    $body = Format-ConfluenceMacroRichTextBody -Content (Format-SimpleHtml -Tag "p" -Contents "This page is automatically generated.&nbsp; Do not edit anything other than the marked section, or your changes may be lost!")
+    $body = Format-ConfluenceMacroRichTextBody -Content (Format-ConfluenceHtml -Tag "p" -Contents "This page is automatically generated.&nbsp; Do not edit anything other than the marked section, or your changes may be lost!")
     $macro = $PC_ConfluenceMacros.Note
     Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -ID $macro.ID -Contents "$param$body"
 }
 
 function Format-ConfluencePageBase($GeneratedContent, $UserSection) {
-    $generatedSection = Format-ConfluenceSection -Contents ((Format-AutomationWarning) + $GeneratedContent + (Format-SimpleHtml -Tag "hr"))
+    $generatedSection = Format-ConfluenceSection -Contents ((Format-AutomationWarning) + $GeneratedContent + (Format-ConfluenceHtml -Tag "hr"))
     Format-ConfluenceLayout -Contents "$generatedSection$UserSection"
 }
 
 function Format-ConfluencePagePropertiesBase($Properties) {
     $propertyRows = @()
     foreach ($prop in $Properties) {
-        $propertyRows += (Format-HtmlTableRow -Cells (@{Type="th";Contents=$prop.Keys[0]},@{Type="td";Contents=$prop.Values[0]}))
+        $propertyRows += (Format-ConfluenceHtmlTableRow -Cells (@{Type="th";Contents=$prop.Keys[0]},@{Type="td";Contents=$prop.Values[0]}))
     }
 
     # build the macro
     $macro = $PC_ConfluenceMacros.PageProperties
-    $propTable = (Format-HtmlTable -Rows $propertyRows)
+    $propTable = (Format-ConfluenceHtmlTable -Rows $propertyRows)
     $propMacro = Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents (Format-ConfluenceMacroRichTextBody -Content $propTable)
 
     # return
-    (Format-SimpleHtml -Tag "h1" -Contents "Properties") + $propMacro
+    (Format-ConfluenceHtml -Tag "h1" -Contents "Properties") + $propMacro
+}
+
+function Get-ConfluenceUserContent($TemplateContent,$UserContentSectionIndex = 1) {
+    # use the supplied parameter to determine the location of the user content
+    # split the TemplateContent in two parts - before the start of the user content (throw away), and after (keep)
+    $userContent = $TemplateContent.Substring(([regex]::Matches($TemplateContent, $PC_ConfluenceTemplates.Layout.SectionStart))[$UserContentSectionIndex].Index)
+
+    # take the piece that starts with the user content and chop off anything after the end of the user content (aka, the first Confluence Section end)
+    $userContent = $userContent.Substring(0, ([regex]::Matches($userContent, $PC_ConfluenceTemplates.Layout.SectionEnd))[0].Index + $PC_ConfluenceTemplates.Layout.SectionEnd.Length)
+    
+    # return
+    $userContent
 }
 
 Export-ModuleMember -Function * -Variable *
