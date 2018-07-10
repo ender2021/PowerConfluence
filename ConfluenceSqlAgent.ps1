@@ -447,19 +447,21 @@ function Publish-SqlAgentJobConfluencePage($ConfluenceConnection,$SqlAgentJob,$S
 
 $ConfluenceConnection = Get-ConfluenceConnection -UserName $Credentials.UserName -ApiToken $Credentials.ApiToken -HostName $Credentials.HostName
 $SqlAgentServerDev = $Credentials.SqlAgentServerDev
-$spaceKey = "GSD"
+$spaceKey = "GDIS"
 
 ########################################
 # refresh a full SqlAgentJob manifest  #
 ########################################
 
-<#
-$manifest = Publish-SqlAgentJobManifestConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -PageTitle "SQL Agent Jobs - GradDiv DEV" -SchedulePageTitle "Job Schedule - GradDiv DEV Jobs"
 
-$jobs = Get-SqlAgentJob -ServerInstance $SqlAgentServerDev | ? { $_.Name.StartsWith("GradDiv", "CurrentCultureIgnoreCase") }
+$scheduleTitle = "Job Schedule - GradDiv DEV Jobs"
+
+$manifest = Publish-SqlAgentJobManifestConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -PageTitle "SQL Agent Jobs - GradDiv DEV" -SchedulePageTitle $scheduleTitle
+
+$jobs = Get-SqlAgentJob -ServerInstance $SqlAgentServerDev | Where-Object { $_.Name.StartsWith("GradDiv", "CurrentCultureIgnoreCase") }
 
 $schedules = $jobs | Get-SqlAgentJobScheduleWithTranslation | Sort-Object -Property @{e={$_.JobEnabled -and $_.IsEnabled}; a=0},@{e={$_.JobEnabled}; a=0},FrequencyTypes,FrequencyRecurrenceFactor,ActiveStartTimeOfDay,Parent
-$schedulePage = Publish-SqlAgentScheduleSummaryConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -Title $title -Schedules $schedules -AncestorID $manifest.id
+Publish-SqlAgentScheduleSummaryConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -Title $scheduleTitle -Schedules $schedules -AncestorID $manifest.id
 
 foreach ($job in $jobs) {
     Publish-SqlAgentJobConfluencePage -ConfluenceConnection $ConfluenceConnection -SqlAgentJob $job -SpaceKey $spaceKey -AncestorID $manifest.id
@@ -470,7 +472,7 @@ foreach ($job in $jobs) {
 # refresh a SqlAgentJob manifest page  #
 ########################################
 
-
+<#
 Publish-SqlAgentJobManifestConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -PageTitle "SQL Agent Jobs - GradDiv DEV" -SchedulePageTitle "Job Schedule - GradDiv DEV Jobs"
 #>
 
@@ -490,8 +492,8 @@ foreach ($job in $jobs) {
 ########################################
 
 <#
-$job = Get-SqlAgentJob -ServerInstance $SqlAgentServerDev -Name "GradDiv - Load X Tables"
-Publish-SqlAgentJobConfluencePage -ConfluenceConnection $ConfluenceConnection -SqlAgentJob $job -SpaceKey $spaceKey -AncestorID 312443414
+$job = Get-SqlAgentJob -ServerInstance $SqlAgentServerDev -Name "GradDiv - Download Degree Files [H] NeoBatch [Production Ready]"
+Publish-SqlAgentJobConfluencePage -ConfluenceConnection $ConfluenceConnection -SqlAgentJob $job -SpaceKey $spaceKey -AncestorID 312410527
 #>
 
 ########################################

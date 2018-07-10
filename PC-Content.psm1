@@ -41,7 +41,7 @@ $PC_ConfluenceMacros = @{
         SchemaVersion = "1"
         ID = "ff3ceaa7-9121-4091-91ed-07131dea988f"
     }
-    Details = @{
+    PageProperties = @{
         Name = "details"
         SchemaVersion = "1"
         ID = "4d43041c-1fb8-4349-90ca-7f30400b5d35"
@@ -125,7 +125,7 @@ function Format-ConfluenceDefaultUserSection() {
     # done
     Format-ConfluenceSection -Contents $sectionContents
 }
-
+Format-ConfluenceDefaultUserSection
 function Format-SimpleHtml($Tag,$Contents="") {
     (&{if($Contents -ne ""){"<$Tag>$Contents</$Tag>"}else{"<$Tag />"}})
 }
@@ -149,7 +149,7 @@ function Format-AutomationWarning() {
 
 function Format-ConfluencePageBase($GeneratedContent, $UserSection) {
     $generatedSection = Format-ConfluenceSection -Contents ((Format-AutomationWarning) + $GeneratedContent + (Format-SimpleHtml -Tag "hr"))
-    Format-ConfluenceLayout -Contents ($generatedSection + $UserSection)
+    Format-ConfluenceLayout -Contents "$generatedSection$UserSection"
 }
 
 function Format-ConfluencePagePropertiesBase($Properties) {
@@ -158,8 +158,13 @@ function Format-ConfluencePagePropertiesBase($Properties) {
         $propertyRows += (Format-HtmlTableRow -Cells (@{Type="th";Contents=$prop.Keys[0]},@{Type="td";Contents=$prop.Values[0]}))
     }
 
+    # build the macro
+    $macro = $PC_ConfluenceMacros.PageProperties
+    $propTable = (Format-HtmlTable -Rows $propertyRows)
+    $propMacro = Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents (Format-ConfluenceMacroRichTextBody -Content $propTable)
+
     # return
-    (Format-SimpleHtml -Tag "h1" -Contents "Properties") + (Format-HtmlTable -Rows $propertyRows)
+    (Format-SimpleHtml -Tag "h1" -Contents "Properties") + $propMacro
 }
 
 Export-ModuleMember -Function * -Variable *
