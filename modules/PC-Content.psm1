@@ -106,7 +106,13 @@ $PC_ConfluenceMacros = @{
             subtle=@{Default=$false;Required=$false}
         }
         RichTextBody=$false
-        Colors = @("Green","Blue","Yellow","Red","Grey")
+        Colors = @{
+            Green="Green"
+            Blue="Blue"
+            Yellow="Yellow"
+            Red="Red"
+            Grey="Grey"
+        }
     }
 }
 
@@ -166,6 +172,18 @@ function Format-ConfluencePagePropertiesReportMacro($Cql,$PageSize,$FirstColumn=
     if ($SortBy -ne "") {$params.Add("sortBy",$SortBy)}
 	
     $macro = $PC_ConfluenceMacros.PagePropertiesReport
+    Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents (Format-ConfluenceMacroParameters -Parameters $params)
+}
+
+function Format-ConfluenceStatusMacro($Color,$Text,[switch]$OutlineStyle)
+{
+    $params = @{
+        colour = $Color
+        title = $Text
+    }
+    if ($OutlineStyle) {$params.Add("subtle","true")}
+    
+    $macro = $PC_ConfluenceMacros.Status
     Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents (Format-ConfluenceMacroParameters -Parameters $params)
 }
 

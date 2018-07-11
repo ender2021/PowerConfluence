@@ -17,8 +17,8 @@ $spaceKey = "GSD"
 ########################################################
 
 
-$catalog = Get-IntegrationServicesCatalog -ServerName $SqlAgentServerDev
-$topHundred = $catalog.Executions.GetList()[0..99]
+$catalog = (Get-IntegrationServicesCatalog -ServerName $SqlAgentServerDev).Executions | Sort-Object -Property StartTime -Descending
+$topHundred = $catalog[0..99]
 Publish-IntegrationServicesExecutionManifestConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -Title "Integration Services - 100 Most Recent Executions" -Executions $topHundred
 #>
 

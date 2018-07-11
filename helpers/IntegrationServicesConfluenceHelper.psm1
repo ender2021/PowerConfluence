@@ -2,6 +2,20 @@
 # useful string libraries #
 ###########################
 
+$_integrationServicesExecutionConfiguration = @{
+    StatusColors = @{
+        Success = $PC_ConfluenceMacros.Status.Colors.Green
+        Running = $PC_ConfluenceMacros.Status.Colors.Blue
+        Stopping = $PC_ConfluenceMacros.Status.Colors.Blue
+        Completion = $PC_ConfluenceMacros.Status.Colors.Blue
+        Pending = $PC_ConfluenceMacros.Status.Colors.Yellow
+        Canceled = $PC_ConfluenceMacros.Status.Colors.Red
+        Failed = $PC_ConfluenceMacros.Status.Colors.Red
+        UnexpectedTerminated = $PC_ConfluenceMacros.Status.Colors.Red
+        Created = $PC_ConfluenceMacros.Status.Colors.Grey
+    }
+    DateTimeFormat = "yyyy-MM-dd HH:mm:ss"
+}
 
 ###############################################################
 #  package execution formatting                               #
@@ -14,36 +28,42 @@ function Format-IntegrationServicesPackageExecutions ($Executions,[switch]$Inclu
     # create the header row
     $headers = @()
     $headers += "ID"
-    if ($IncludePackage) {$headers += "Folder"}
-    if ($IncludePackage) {$headers += "Project"}
     if ($IncludePackage) {$headers += "Package"}
     $headers += "Completed"
     $headers += "Status"
     $headers += "Start Time"
     $headers += "End Time"
     $headers += "Duration"
+    #if ($IncludePackage) {$headers += "Project"}
+    #if ($IncludePackage) {$headers += "Folder"}
     $rows += Format-ConfluenceHtmlTableHeaderRow -Headers $headers
 
     # build out the executions rows
     foreach ($e in $Executions) {
 
-        #TODO - decide on how to render status - maybe the status macro hurr durr
-        $statusContent = ""
+        $statusColor = $_integrationServicesExecutionConfiguration.StatusColors.Item($e.Status)
+        $statusContent = Format-ConfluenceStatusMacro -Color $statusColor -Text $e.Status
 
-        #TODO - calculate duration
-        $duration = 
+        # Set end time and duration if the job has ended
+        $endTime = ""
+        if ($e.Completed) {
+            $endTime = $e.EndTime.ToString($_integrationServicesExecutionConfiguration.DateTimeFormat)
+            $duration = $e.EndTime.Subtract($e.StartTime).ToString("hh\:mm\:ss")
+        } else {
+            $duration ="N/A"
+            $endTime = "N/A"
+        }
 
         $cells = @()
         $cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $e.Id
-        if ($IncludePackage) {$cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $e.FolderName}
-        if ($IncludePackage) {$cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $e.ProjectName}
         if ($IncludePackage) {$cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $e.PackageName}
         $cells += New-ConfluenceHtmlTableCell -Type "td" -Contents (Format-ConfluenceIcon -Icon $e.Completed) -Center $true
         $cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $statusContent
-        $cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $e.StartTime
-        $cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $e.EndTime
+        $cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $e.StartTime.ToString($_integrationServicesExecutionConfiguration.DateTimeFormat)
+        $cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $endTime
         $cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $duration
-        $rows += Format-ConfluenceHtmlTableRow -Cells $cells
+        #if ($IncludePackage) {$cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $e.ProjectName}
+        #if ($IncludePackage) {$cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $e.FolderName}
         $rows += Format-ConfluenceHtmlTableRow -Cells $cells
     }
     
