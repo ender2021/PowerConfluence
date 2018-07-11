@@ -13,7 +13,7 @@ Import-Module .\Credentials.psm1 -Force
 #########################
 
 $ConfluenceConnection = Get-ConfluenceConnection -UserName $Credentials.UserName -ApiToken $Credentials.ApiToken -HostName $Credentials.HostName
-# $SqlAgentServerDev = $Credentials.SqlAgentServerDev
+$SqlAgentServerDev = $Credentials.SqlAgentServerDev
 $spaceKey = "GSD"
 
 ########################################
@@ -39,7 +39,7 @@ foreach ($job in $jobs) {
 # refresh a SqlAgentJob manifest page  #
 ########################################
 
-
+<#
 Publish-SqlAgentJobManifestConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -PageTitle "SQL Agent Jobs - GradDiv DEV" -SchedulePageTitle "Job Schedule - GradDiv DEV Jobs"
 #>
 
@@ -58,9 +58,9 @@ foreach ($job in $jobs) {
 # refresh a SqlAgentJob profile page   #
 ########################################
 
-<#
+
 $job = Get-SqlAgentJob -ServerInstance $SqlAgentServerDev -Name "GradDiv - Download Degree Files [H] NeoBatch [Production Ready]"
-Publish-SqlAgentJobConfluencePage -ConfluenceConnection $ConfluenceConnection -SqlAgentJob $job -SpaceKey $spaceKey -AncestorID 312410527
+Publish-SqlAgentJobConfluencePage -ConfluenceConnection $ConfluenceConnection -SqlAgentJob $job -SpaceKey $spaceKey -AncestorID 312868932
 #>
 
 ########################################
