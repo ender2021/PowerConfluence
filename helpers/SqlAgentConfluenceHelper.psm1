@@ -1,5 +1,3 @@
-Import-Module (Join-Path -Path $PSScriptRoot -ChildPath ..\PowerConfluence.psm1) -Force
-
 ###########################
 # useful string libraries #
 ###########################
@@ -20,12 +18,7 @@ $_sqlAgentJobManifestConfiguration = @{
     }
 }
 
-<#
-$_integrationServicesPackageTemplateStrings = @{
-    ExecutionsTableStart = '<h1>Execution(s)</h1><table class="relative-table"><tbody><tr><th>ID</th><th>Completed</th><th>Status</th><th>Start Time</th><th>End Time</th><th>Duration</th></tr>';
-    ExecutionsTableEnd = '</tbody></table>';
-}
-#>
+
 
 $_pageLabels = @{
     SqlAgentJob = 'sql-agent-job'
@@ -223,26 +216,27 @@ function Format-SqlAgentScheduleSummaryConfluencePage($Schedules, $UserSection=(
     $rows = @()
     
     # create the header row
-    $headerCells = @(
-        @{Type="th";Contents="Job Name"},
-        @{Type="th";Contents="Job Enabled"},
-        @{Type="th";Contents="Schedule Name"},
-        @{Type="th";Contents="Schedule Enabled"},
-        @{Type="th";Contents="Execution Frequency"},
-        @{Type="th";Contents="Execution Time"}
+    $headers = @(
+        "Job Name",
+        "Job Enabled",
+        "Schedule Name",
+        "Schedule Enabled",
+        "Execution Frequency",
+        "Execution Time"
     )    
-    $rows += Format-ConfluenceHtmlTableRow -Cells $headerCells
+    $rows += Format-ConfluenceHtmlTableHeaderRow -Headers $headers
 
     # build out the schedule rows
     foreach ($schedule in $Schedules) {
-        $cells = @(
-                @{Type="td";Contents=(Format-ConfluencePageLink -TargetPageTitle $schedule.Parent -LinkText $schedule.Parent)},
-                @{Type="td";Contents=(Format-ConfluenceIcon -IconName (&{If($schedule.JobEnabled) {$PC_ConfluenceEmoticons.Tick} Else {$PC_ConfluenceEmoticons.Cross}}));Center=$true},
-                @{Type="td";Contents=$schedule.Name},
-                @{Type="td";Contents=(Format-ConfluenceIcon -IconName (&{If($schedule.IsEnabled) {$PC_ConfluenceEmoticons.Tick} Else {$PC_ConfluenceEmoticons.Cross}}));Center=$true},
-                @{Type="td";Contents=$schedule.FrequencyTranslation},
-                @{Type="td";Contents=$schedule.StartTimeTranslation}
-            )
+        $jobNameLink = (Format-ConfluencePageLink -TargetPageTitle $schedule.Parent -LinkText $schedule.Parent)
+
+        $cells = @()
+        $cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $jobNameLink
+        $cells += New-ConfluenceHtmlTableCell -Type "td" -Contents (Format-ConfluenceIcon -Icon $schedule.JobEnabled) -Center $true
+        $cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $schedule.Name
+        $cells += New-ConfluenceHtmlTableCell -Type "td" -Contents (Format-ConfluenceIcon -Icon $schedule.IsEnabled) -Center $true
+        $cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $schedule.FrequencyTranslation
+        $cells += New-ConfluenceHtmlTableCell -Type "td" -Contents $schedule.StartTimeTranslation
         $rows += Format-ConfluenceHtmlTableRow -Cells $cells
     }
     
@@ -295,7 +289,7 @@ function Format-SqlAgentJobConfluencePageProperties($SqlAgentJob) {
     $properties = @(
         @{"SQL Agent Job Name" = $SqlAgentJob.Name}
         @{Description = (&{if($SqlAgentJob.Description -ne ""){[System.Net.WebUtility]::HtmlEncode($SqlAgentJob.Description)}else{"N/A"}})},
-        @{Enabled = Format-ConfluenceIcon -IconName (&{If($SqlAgentJob.IsEnabled) {$PC_ConfluenceEmoticons.Tick} Else {$PC_ConfluenceEmoticons.Cross}})},
+        @{Enabled = Format-ConfluenceIcon -Icon $SqlAgentJob.IsEnabled},
         @{Schedules = ($SqlAgentJob|Get-SqlAgentJobSchedule|Measure-Object).Count},
         @{Steps = ($SqlAgentJob|Get-SqlAgentJobStep|Measure-Object).Count},
         @{Owner = $SqlAgentJob.OwnerLoginName},
@@ -309,26 +303,26 @@ function Format-SqlAgentJobConfluencePageSchedules($SqlAgentJob) {
     $rows = @()
 
     # create the header row
-    $headerCells = @(
-        @{Type="th";Contents="Schedule Name"},
-        @{Type="th";Contents="Enabled"},
-        @{Type="th";Contents="Execution Frequency"},
-        @{Type="th";Contents="Execution Time"},
-        @{Type="th";Contents="Activation Date"},
-        @{Type="th";Contents="Date Created"}
+    $headers = @(
+        "Schedule Name",
+        "Enabled",
+        "Execution Frequency",
+        "Execution Time",
+        "Activation Date",
+        "Date Created"
     )    
-    $rows += Format-ConfluenceHtmlTableRow -Cells $headerCells
+    $rows += Format-ConfluenceHtmlTableHeaderRow -Headers $headers
 
     # create the schedule rows
     $schedules = $SqlAgentJob | Get-SqlAgentJobScheduleWithTranslation
     foreach ($schedule in $schedules) {
         $cells = @(
-            @{Type="td";Contents=$schedule.Name},
-            @{Type="td";Contents=(Format-ConfluenceIcon -IconName (&{If($schedule.IsEnabled) {$PC_ConfluenceEmoticons.Tick} Else {$PC_ConfluenceEmoticons.Cross}}))},
-            @{Type="td";Contents=$schedule.FrequencyTranslation},
-            @{Type="td";Contents=$schedule.StartTimeTranslation},
-            @{Type="td";Contents=Format-ConfluenceDate($schedule.ActiveStartDate)}
-            @{Type="td";Contents=Format-ConfluenceDate($schedule.DateCreated)}
+            (New-ConfluenceHtmlTableCell -Type "td" -Contents $schedule.Name),
+            (New-ConfluenceHtmlTableCell -Type "td" -Contents (Format-ConfluenceIcon -Icon $schedule.IsEnabled)),
+            (New-ConfluenceHtmlTableCell -Type "td" -Contents $schedule.FrequencyTranslation),
+            (New-ConfluenceHtmlTableCell -Type "td" -Contents $schedule.StartTimeTranslation),
+            (New-ConfluenceHtmlTableCell -Type "td" -Contents Format-ConfluenceDate($schedule.ActiveStartDate)),
+            (New-ConfluenceHtmlTableCell -Type "td" -Contents Format-ConfluenceDate($schedule.DateCreated))
         )
         $rows += Format-ConfluenceHtmlTableRow -Cells $cells
     }
@@ -341,16 +335,16 @@ function Format-SqlAgentJobConfluencePageSteps($SqlAgentJob) {
     $rows = @()
 
     # create the header row
-    $headerCells = @(
-        @{Type="th";Contents="#"},
-        @{Type="th";Contents="Step Name"},
-        @{Type="th";Contents="Step Type"},
-        @{Type="th";Contents="Package"},
-        @{Type="th";Contents="Package Path"},
-        @{Type="th";Contents="On Fail"},
-        @{Type="th";Contents="On Success"}
+    $headers = @(
+        "#",
+        "Step Name",
+        "Step Type",
+        "Package",
+        "Package Path",
+        "On Fail",
+        "On Success"
     )    
-    $rows += Format-ConfluenceHtmlTableRow -Cells $headerCells
+    $rows += Format-ConfluenceHtmlTableHeaderRow -Headers $headers
 
     # create the step rows
     $steps = $SqlAgentJob | Get-SqlAgentJobStep
@@ -360,16 +354,17 @@ function Format-SqlAgentJobConfluencePageSteps($SqlAgentJob) {
         $packagePathArr = $packageFullPath.Split('\')
         $failAction = $($step.OnFailAction -csplit "(?<=.)(?=[A-Z])")
         $successAction = $($step.OnSuccessAction -csplit "(?<=.)(?=[A-Z])")
-
+        $numberContents = "" + $step.ID + (&{If($SqlAgentJob.StartStepID -eq $step.ID) {" " + (Format-ConfluenceIcon -Icon $PC_ConfluenceEmoticons.StarYellow)} Else {""}})
+        
         # create the cells
         $cells = @(
-            @{Type="td";Contents="" + $step.ID + (&{If($SqlAgentJob.StartStepID -eq $step.ID) {" " + (Format-ConfluenceIcon -IconName "yellow-star")} Else {""}})},
-            @{Type="td";Contents=$step.Name},
-            @{Type="td";Contents=$step.SubSystem},
-            @{Type="td";Contents=$packagePathArr[2]},
-            @{Type="td";Contents=$packagePathArr[0] + '\' + $packagePathArr[1]},
-            @{Type="td";Contents="$failAction"},
-            @{Type="td";Contents="$successAction"}
+            (New-ConfluenceHtmlTableCell -Type "td" -Contents $numberContents),
+            (New-ConfluenceHtmlTableCell -Type "td" -Contents $step.Name),
+            (New-ConfluenceHtmlTableCell -Type "td" -Contents $step.SubSystem),
+            (New-ConfluenceHtmlTableCell -Type "td" -Contents $packagePathArr[2]),
+            (New-ConfluenceHtmlTableCell -Type "td" -Contents ($packagePathArr[0] + '\' + $packagePathArr[1])),
+            (New-ConfluenceHtmlTableCell -Type "td" -Contents "$failAction"),
+            (New-ConfluenceHtmlTableCell -Type "td" -Contents "$successAction")
         )
 
         # render the row and add it to the list
@@ -378,7 +373,7 @@ function Format-SqlAgentJobConfluencePageSteps($SqlAgentJob) {
 
     # build the return string
     $header = Format-ConfluenceHtml -Tag "h1" -Contents "Step(s)"
-    $note = Format-ConfluenceHtml -Tag "p" -Contents ((Format-ConfluenceIcon -IconName "yellow-star") + "&nbsp;= First Step")
+    $note = Format-ConfluenceHtml -Tag "p" -Contents ((Format-ConfluenceIcon -Icon $PC_ConfluenceEmoticons.StarYellow) + "&nbsp;= First Step")
     $table = Format-ConfluenceHtmlTable -Rows $rows
 
     # return

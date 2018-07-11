@@ -128,6 +128,18 @@ function Format-ConfluenceHtmlTableRow($Cells) {
     "<tr>$cellTags</tr>"
 }
 
+function Format-ConfluenceHtmlTableHeaderRow($Headers=@(),$Center) {
+    $cells = @()
+    foreach ($h in $Headers) {$cells += (New-ConfluenceHtmlTableCell -Type "th" -Contents $h -Center $Center)}
+    Format-ConfluenceHtmlTableRow -Cells $cells
+}
+
+function New-ConfluenceHtmlTableCell($Type,$Contents,$Center=$false) {
+    $toReturn = @{Type="$Type";Contents="$Contents"}
+    if ($Center) {$toReturn.Add("Center",$true)}
+    $toReturn
+}
+
 function Format-ConfluenceMacro($Name,$SchemaVersion,$Contents) {
     $PC_ConfluenceTemplates.Macro.MacroTemplate -f $Name,$SchemaVersion,"$Contents"
 }
@@ -169,8 +181,9 @@ function Format-ConfluenceDate($DateTime) {
     $PC_ConfluenceTemplates.Formatting.DateTemplate -f $DateTime.ToString("yyyy-MM-dd")
 }
 
-function Format-ConfluenceIcon($IconName) {
-    $PC_ConfluenceTemplates.Formatting.IconTemplate -f "$IconName"
+function Format-ConfluenceIcon($Icon) {
+    $name = (&{if ($Icon.GetType().Name -eq "Boolean") {(&{If($Icon) {$PC_ConfluenceEmoticons.Tick} Else {$PC_ConfluenceEmoticons.Cross}})} else {$Icon}})
+    $PC_ConfluenceTemplates.Formatting.IconTemplate -f "$name"
 }
 
 function Format-ConfluencePageLink($TargetPageTitle,$LinkText) {
