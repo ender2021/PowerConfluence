@@ -248,6 +248,7 @@ function Format-AutomationWarning() {
 }
 
 function Format-ConfluencePageBase($GeneratedContent, $UserSection) {
+    #TODO - update this function to accept a content array that combines generated and user content
     $contents = (Format-AutomationWarning) + $GeneratedContent + (Format-ConfluenceHtml -Tag "hr")
     $generatedSection = Format-ConfluenceSection -Contents (Format-ConfluenceCell -Contents $contents)
     Format-ConfluenceLayout -Contents "$generatedSection$UserSection"
