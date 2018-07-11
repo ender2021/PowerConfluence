@@ -187,7 +187,7 @@ function Update-SqlAgentJobManifestConfluencePage($ConfluenceConnection,$Page,$P
     $updateTitle = (&{if($PageTitle -eq "") {$Page.title} else {$PageTitle}})
 
     # get the user-generated content
-    $userContent = Get-ConfluenceUserContent -TemplateContent $Page.body.storage.value
+    $userContent = (Get-ConfluenceUserContent -TemplateContent $Page.body.storage.value)[1]
 
     # render the content
     $pageContents = Format-SqlAgentJobManifestConfluencePage -SchedulePageTitle $SchedulePageTitle -UserSection $userContent
@@ -259,7 +259,7 @@ function Update-SqlAgentScheduleSummaryConfluencePage($ConfluenceConnection,$Pag
     $updateTitle = (&{if($Title -eq "") {$Page.title} else {$Title}})
 
     # get the user-generated content
-    $userContent = Get-ConfluenceUserContent -TemplateContent $Page.body.storage.value
+    $userContent = (Get-ConfluenceUserContent -TemplateContent $Page.body.storage.value)[1]
 
     # render the content
     $pageContents = Format-SqlAgentScheduleSummaryConfluencePage -Schedules $Schedules -UserSection $userContent
@@ -401,7 +401,7 @@ function Update-SqlAgentJobConfluencePage($ConfluenceConnection,$SqlAgentJob,$Pa
     $updateTitle = (&{if($Title -eq "") {$Page.title} else {$Title}})
 
     # get the user-generated content
-    $userContent = Get-ConfluenceUserContent -TemplateContent $Page.body.storage.value
+    $userContent = (Get-ConfluenceUserContent -TemplateContent $Page.body.storage.value)[1]
 
     # render the content
     $pageContents = Format-SqlAgentJobConfluencePage -SqlAgentJob $SqlAgentJob -UserSection $userContent

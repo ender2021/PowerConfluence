@@ -17,6 +17,23 @@ $SqlAgentServerDev = $Credentials.SqlAgentServerDev
 $spaceKey = "GSD"
 
 ########################################
+# xml experiments                      #
+########################################
+<#
+$page = Get-ConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -Title "Complex Layout Test" -Expand @("body.storage")
+$storage = $page.body.storage.value
+$content = Get-ConfluenceUserContent -TemplateContent $storage -UserSectionMap $PC_ConfluenceTemplates.Layout.UserSection.ComplexMap
+$content -join "`n"
+#$xml = [xml]($storage.Replace($PC_ConfluenceTemplates.Layout.LayoutStart, $PC_ConfluenceTemplates.Layout.LayoutStartWithNamespace))
+#$xml.layout.ChildNodes
+#$items = Select-Xml -Xml $xml -XPath '/ac:section' -Namespace @{ac="confluence.atlassian.com"}
+#$items
+
+#$XPath = "/ac:layout/Type/Members/AliasProperty"
+#Select-Xml -Xml $body -XPath $Xpath | Select-Object -ExpandProperty Node
+#>
+
+########################################
 # refresh a full SqlAgentJob manifest  #
 ########################################
 

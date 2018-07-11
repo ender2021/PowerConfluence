@@ -28,10 +28,17 @@ $PC_ConfluenceEmoticons = @{
 $PC_ConfluenceTemplates = @{
     Layout = @{
         LayoutTemplate = '<ac:layout>{0}</ac:layout>'
-        SectionTemplate = '<ac:layout-section ac:type="{0}"><ac:layout-cell>{1}</ac:layout-cell></ac:layout-section>'
-        SectionStart = '<ac:layout-section ac:type="single"><ac:layout-cell>'
-        SectionEnd = '</ac:layout-cell></ac:layout-section>'
+        SectionTemplate = '<ac:layout-section ac:type="{0}">{1}</ac:layout-section>'
+        SectionStart = '<ac:layout-section ac:type="'
+        SectionEnd = '</ac:layout-section>'
+        CellTemplate = '<ac:layout-cell>{0}</ac:layout-cell>'
+        CellStart = '<ac:layout-cell>'
+        CellEnd = '</ac:layout-cell>'
         SectionDefaultType = 'single'
+        UserSection = @{
+            DefaultMap = @($false,$true) # the page has two single sections
+            ComplexMap = @(@($true,$false),$true,$false) # the page has 3 sections, 1 w/ 1 custom cell and 1 autocell
+        }
     }
     Macro = @{
         MacroTemplate = '<ac:structured-macro ac:name="{0}" ac:schema-version="{1}">{2}</ac:structured-macro>'
@@ -195,6 +202,10 @@ function Format-ConfluenceSection($Contents,$Type=$PC_ConfluenceTemplates.Layout
     $PC_ConfluenceTemplates.Layout.SectionTemplate -f "$Type","$Contents"
 }
 
+function Format-ConfluenceCell($Contents) {
+    $PC_ConfluenceTemplates.Layout.CellTemplate -f "$Contents"
+}
+
 function Format-ConfluenceDate($DateTime) {
     $PC_ConfluenceTemplates.Formatting.DateTemplate -f $DateTime.ToString("yyyy-MM-dd")
 }
@@ -221,12 +232,12 @@ function Format-ConfluenceDefaultUserSection() {
     $macroContents += (Format-ConfluenceMacroParameters -Parameters @{title="Editable Section"})
     $macroContents += (Format-ConfluenceMacroRichTextBody -Content (Format-ConfluenceHtml -Tag "p" -Contents "You may edit anything below this panel!"))
     $sectionContents += (Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents $macroContents)
-    
+
     # section body
     $sectionContents += (Format-ConfluenceHtml -Tag "p" -Contents "No notes yet!")
     
     # done
-    Format-ConfluenceSection -Contents $sectionContents
+    Format-ConfluenceSection -Contents (Format-ConfluenceCell -Contents $sectionContents)
 }
 
 function Format-AutomationWarning() {
@@ -237,7 +248,8 @@ function Format-AutomationWarning() {
 }
 
 function Format-ConfluencePageBase($GeneratedContent, $UserSection) {
-    $generatedSection = Format-ConfluenceSection -Contents ((Format-AutomationWarning) + $GeneratedContent + (Format-ConfluenceHtml -Tag "hr"))
+    $contents = (Format-AutomationWarning) + $GeneratedContent + (Format-ConfluenceHtml -Tag "hr")
+    $generatedSection = Format-ConfluenceSection -Contents (Format-ConfluenceCell -Contents $contents)
     Format-ConfluenceLayout -Contents "$generatedSection$UserSection"
 }
 
@@ -256,16 +268,89 @@ function Format-ConfluencePagePropertiesBase($Properties) {
     (Format-ConfluenceHtml -Tag "h1" -Contents "Properties") + $propMacro
 }
 
-function Get-ConfluenceUserContent($TemplateContent,$UserContentSectionIndex = 1) {
-    # use the supplied parameter to determine the location of the user content
-    # split the TemplateContent in two parts - before the start of the user content (throw away), and after (keep)
-    $userContent = $TemplateContent.Substring(([regex]::Matches($TemplateContent, $PC_ConfluenceTemplates.Layout.SectionStart))[$UserContentSectionIndex].Index)
+function Get-ConfluenceUserContent($TemplateContent,$UserSectionMap = $PC_ConfluenceTemplates.Layout.UserSection.DefaultMap) {
+    #start an array to track the content we find
+    $userContent = @()
 
-    # take the piece that starts with the user content and chop off anything after the end of the user content (aka, the first Confluence Section end)
-    $userContent = $userContent.Substring(0, ([regex]::Matches($userContent, $PC_ConfluenceTemplates.Layout.SectionEnd))[0].Index + $PC_ConfluenceTemplates.Layout.SectionEnd.Length)
+    # get the sections
+    $sections = Get-ConfluenceSections -StorageFormat $TemplateContent
     
+    # make sure the map matches the content we have, count-wise
+    if ($sections.Count -ne $UserSectionMap.Count) { Throw "There is a mis-match between number of sections in the supplied UserSectionMap and the content"}
+
+    # loop through the map and grab the content we need
+    for($i=0;$i -lt $UserSectionMap.Count;$i++) {
+        switch ($UserSectionMap[$i].GetType().Name) {
+            Boolean {
+                $userContent += (&{if($UserSectionMap[$i]) {$sections[$i]} else {$null}})
+            }
+            "Object[]" {
+                # get the cells
+                $cells = Get-ConfluenceCells -StorageFormat $sections[$i]
+                $cellMap = $UserSectionMap[$i]
+                # make sure the map matches the content we have, count-wise
+                if ($cells.Count -ne $cellMap.Count) { Throw "There is a mis-match between the number of cells in a section in supplied UserSectionMap and the content"}
+                # loop through the map and grab the content we need
+                $cellContent = @()
+                for($j=0;$j -lt $cellMap.Count;$j++) {
+                    $cellContent += (&{if($cellMap[$j]) {$cells[$j]} else {$null}})                    
+                }
+                # add the cells to the user contents array
+                $userContent += ,$cellContent
+            }
+            Default {
+                Throw "Unrecognized value in UserSectionMap"
+            }
+        }
+    }
+
     # return
     $userContent
 }
+
+function Get-ConfluenceSections($StorageFormat) {
+    Split-ConfluenceLayout -StorageFormat $StorageFormat -StartToken $PC_ConfluenceTemplates.Layout.SectionStart -EndToken $PC_ConfluenceTemplates.Layout.SectionEnd
+}
+
+function Get-ConfluenceCells($StorageFormat) {
+    Split-ConfluenceLayout -StorageFormat $StorageFormat -StartToken $PC_ConfluenceTemplates.Layout.CellStart -EndToken $PC_ConfluenceTemplates.Layout.CellEnd
+}
+
+function Split-ConfluenceLayout($StorageFormat,$StartToken,$EndToken)
+{
+    #start a list
+    $sections = @()
+    
+    # find the starting indexes of the $StartToken in the entire body and loop through them
+    $startMatches = [regex]::Matches($StorageFormat, $StartToken)
+    foreach ($match in $startMatches) {
+        # start by taking the part of the string that occurs after the start of the StartToken
+        $section = $StorageFormat.Substring($match.Index)
+
+        # now chop off everything after the end of the first EndToken in the remaining string
+        $section = $section.Substring(0, ([regex]::Matches($section, $EndToken))[0].Index + $EndToken.Length)
+
+        # add the trimmed section to the list
+        $sections += $section
+    }
+
+    #return the list
+    $sections
+}
+
+    # map structure pseudocode:
+    # $map = $(sections)   # sections are either a bool ($true = UserSection) or an array of bools
+    # 
+    # Example:
+    # $map = $($true,$($true,$false),$($false,$true,$false))
+    # ----------------------------------------------------
+    # |       SINGLE COLUMN USER SECTION                 |
+    # ----------------------------------------------------
+    # ----------------------------------------------------
+    # |     USER CELL       |     GENERATED CELL         |
+    # ----------------------------------------------------
+    # ----------------------------------------------------
+    # |  GEN. CELL    |   USER CELL    |    GEN. CELL    |      
+    # ---------------------------------------------------- 
 
 Export-ModuleMember -Function * -Variable *

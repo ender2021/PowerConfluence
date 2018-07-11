@@ -94,7 +94,7 @@ function Update-IntegrationServicesExecutionManifestConfluencePage($ConfluenceCo
     $updateTitle = (&{if($Title -eq "") {$Page.title} else {$Title}})
 
     # get the user-generated content
-    $userContent = Get-ConfluenceUserContent -TemplateContent $Page.body.storage.value
+    $userContent = (Get-ConfluenceUserContent -TemplateContent $Page.body.storage.value)[1]
 
     # render the content
     $pageContents = Format-IntegrationServicesExecutionManifestConfluencePage -Executions $Executions -UserSection $userContent
