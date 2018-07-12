@@ -1,6 +1,6 @@
-﻿###########################
-# useful string libraries #
-###########################
+﻿########################################
+# module configuration + magic strings #
+########################################
 
 $PC_ConfluenceEmoticons = @{
     Smile="smile"
@@ -123,9 +123,9 @@ $PC_ConfluenceMacros = @{
     }
 }
 
-########################################
-# Confluence content rendering support #
-########################################
+######################################################
+# Confluence HTML building (aka norml HTML building) #
+######################################################
 
 function Format-ConfluenceHtml($Tag,$Contents="") {
     (&{if($Contents -ne ""){"<$Tag>$Contents</$Tag>"}else{"<$Tag />"}})
@@ -153,6 +153,10 @@ function New-ConfluenceHtmlTableCell($Type,$Contents,$Center=$false) {
     $toReturn
 }
 
+#########################################
+# Confluence structured macro templates #
+#########################################
+
 function Format-ConfluenceMacro($Name,$SchemaVersion,$Contents) {
     $PC_ConfluenceTemplates.Macro.MacroTemplate -f $Name,$SchemaVersion,"$Contents"
 }
@@ -169,6 +173,10 @@ function Format-ConfluenceMacroRichTextBody($Content) {
     $PC_ConfluenceTemplates.Macro.RichTextBodyTemplate -f "$Content"
 }
 
+########################################
+# Specific Confluence macro helpers    #
+########################################
+
 function Format-ConfluencePagePropertiesReportMacro($Cql,$PageSize,$FirstColumn="",$Headings="",$SortBy="") {
     $params = @{
         cql = $Cql
@@ -180,6 +188,21 @@ function Format-ConfluencePagePropertiesReportMacro($Cql,$PageSize,$FirstColumn=
 	
     $macro = $PC_ConfluenceMacros.PagePropertiesReport
     Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents (Format-ConfluenceMacroParameters -Parameters $params)
+}
+
+function Format-ConfluencePagePropertiesMacro($Properties) {
+    $propertyRows = @()
+    foreach ($prop in $Properties) {
+        $propertyRows += (Format-ConfluenceHtmlTableRow -Cells (@{Type="th";Contents=$prop.Keys[0]},@{Type="td";Contents=$prop.Values[0]}))
+    }
+
+    # build the macro
+    $macro = $PC_ConfluenceMacros.PageProperties
+    $propTable = (Format-ConfluenceHtmlTable -Rows $propertyRows)
+    $propMacro = Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents (Format-ConfluenceMacroRichTextBody -Content $propTable)
+
+    # return
+    $propMacro
 }
 
 function Format-ConfluenceStatusMacro($Color,$Text,[switch]$OutlineStyle)
@@ -194,6 +217,27 @@ function Format-ConfluenceStatusMacro($Color,$Text,[switch]$OutlineStyle)
     Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents (Format-ConfluenceMacroParameters -Parameters $params)
 }
 
+function Format-ConfluenceDate($DateTime) {
+    $PC_ConfluenceTemplates.Formatting.DateTemplate -f $DateTime.ToString("yyyy-MM-dd")
+}
+
+function Format-ConfluenceIcon($Icon) {
+    if ($Icon -eq $null) {
+        $name = $PC_ConfluenceEmoticons.Question
+    } else {
+        $name = (&{if ($Icon.GetType().Name -eq "Boolean") {(&{If($Icon) {$PC_ConfluenceEmoticons.Tick} Else {$PC_ConfluenceEmoticons.Cross}})} else {$Icon}})
+    }
+    $PC_ConfluenceTemplates.Formatting.IconTemplate -f "$name"
+}
+
+function Format-ConfluencePageLink($TargetPageTitle,$LinkText) {
+    $PC_ConfluenceTemplates.Formatting.PageLinkTemplate -f "$TargetPageTitle","$LinkText"
+}
+
+########################################
+# Confluence layout rendering          #
+########################################
+
 function Format-ConfluenceLayout($Contents) {
     $PC_ConfluenceTemplates.Layout.LayoutTemplate -f "$Contents"
 }
@@ -206,18 +250,40 @@ function Format-ConfluenceCell($Contents) {
     $PC_ConfluenceTemplates.Layout.CellTemplate -f "$Contents"
 }
 
-function Format-ConfluenceDate($DateTime) {
-    $PC_ConfluenceTemplates.Formatting.DateTemplate -f $DateTime.ToString("yyyy-MM-dd")
+function Format-ConfluencePageBase($ContentMap) {
+    $content = @()
+
+    foreach ($i in $ContentMap) {
+        switch ($i.GetType().Name) {
+            Hashtable {
+                $content += (&{if($i.Generated){Format-ConfluenceAutomatedSection -GeneratedContent $i.Content}else{$i.Content}})
+            }
+            "Object[]" {
+                $sectionContents = @()
+                foreach ($j in $i) {
+                    if ($j.GetType().Name -ne "Hashtable") { Throw "ContentMap is malformed at $i`[$j`]"}
+                    $sectionContents += (&{if($j.Generated){Format-ConfluenceAutomatedCell -GeneratedContent $j.Content}else{$j.Content}})
+                }
+                $sectionType = switch ($i.Count) {
+                    1 {"single"}
+                    2 {"two_equal"}
+                    3 {"three_equal"}
+                    Default {Throw "ContentMap is malformed at $i"}
+                }
+                # add the cells to the user contents array
+                $content += Format-ConfluenceSection $sectionContents -Type $sectionType
+            }
+            Default {
+                Throw "Unrecognized value in ContentMap: $i"
+            }
+        }
+    }
+    Format-ConfluenceLayout -Contents "$content"
 }
 
-function Format-ConfluenceIcon($Icon) {
-    $name = (&{if ($Icon.GetType().Name -eq "Boolean") {(&{If($Icon) {$PC_ConfluenceEmoticons.Tick} Else {$PC_ConfluenceEmoticons.Cross}})} else {$Icon}})
-    $PC_ConfluenceTemplates.Formatting.IconTemplate -f "$name"
-}
-
-function Format-ConfluencePageLink($TargetPageTitle,$LinkText) {
-    $PC_ConfluenceTemplates.Formatting.PageLinkTemplate -f "$TargetPageTitle","$LinkText"
-}
+########################################
+# Special-use Confluence content       #
+########################################
 
 function Format-ConfluenceDefaultUserSection() {
     # build the content
@@ -257,45 +323,9 @@ function Format-ConfluenceAutomatedCell($GeneratedContent) {
     Format-ConfluenceCell -Contents $contents
 }
 
-function Format-ConfluencePageBase($ContentMap) {
-    $content = @()
-
-    foreach ($i in $ContentMap) {
-        switch ($i.GetType().Name) {
-            Hashtable {
-                $content += (&{if($i.Generated){Format-ConfluenceAutomatedSection -GeneratedContent $i.Content}else{$i.Content}})
-            }
-            "Object[]" {
-                $sectionContents = @()
-                foreach ($j in $i) {
-                    if ($j.GetType().Name -ne "Hashtable") { Throw "ContentMap is malformed at $i`[$j`]"}
-                    $sectionContents += (&{if($j.Generated){Format-ConfluenceAutomatedCell -GeneratedContent $j.Content}else{$j.Content}})
-                }
-                # add the cells to the user contents array
-                $content += $sectionContents
-            }
-            Default {
-                Throw "Unrecognized value in ContentMap: $i"
-            }
-        }
-    }
-    Format-ConfluenceLayout -Contents "$content"
-}
-
-function Format-ConfluencePagePropertiesBase($Properties) {
-    $propertyRows = @()
-    foreach ($prop in $Properties) {
-        $propertyRows += (Format-ConfluenceHtmlTableRow -Cells (@{Type="th";Contents=$prop.Keys[0]},@{Type="td";Contents=$prop.Values[0]}))
-    }
-
-    # build the macro
-    $macro = $PC_ConfluenceMacros.PageProperties
-    $propTable = (Format-ConfluenceHtmlTable -Rows $propertyRows)
-    $propMacro = Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents (Format-ConfluenceMacroRichTextBody -Content $propTable)
-
-    # return
-    (Format-ConfluenceHtml -Tag "h1" -Contents "Properties") + $propMacro
-}
+########################################
+# Confluence storage format parsing    #
+########################################
 
 function Get-ConfluenceContentMap($TemplateContent,$UserContentMap = $PC_ConfluenceTemplates.Layout.UserSection.DefaultMap) {
     #start an array to track the content we find
@@ -303,7 +333,10 @@ function Get-ConfluenceContentMap($TemplateContent,$UserContentMap = $PC_Conflue
 
     # get the sections
     $sections = Get-ConfluenceSections -StorageFormat $TemplateContent
-    
+
+    # if the page doesn't have sections, wrap the content in a section and go again
+    if ($sections -eq $null) { $sections = Get-ConfluenceSections -StorageFormat (Format-ConfluenceSection -Contents $TemplateContent) }
+
     # make sure the map matches the content we have, count-wise
     if ($sections.Count -ne $UserContentMap.Count) { Throw "There is a mis-match between number of sections in the supplied UserContentMap and the content"}
 

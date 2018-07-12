@@ -2,6 +2,12 @@
 # useful string libraries #
 ###########################
 
+$_integrationServicesPackageConfiguration = @{
+    DefaultUserProperties = @("Common Name,Data Source(s),Data Destination(s),Technical Contact(s),Business Contact(s),Customer Contact(s),Related Application(s),Related Department(s)".Split(","))
+    ContentMap = @(@($true,$false),$true,$false)
+    PageNameSuffix = '(Package)'
+}
+
 $_integrationServicesExecutionConfiguration = @{
     StatusColors = @{
         Success = $PC_ConfluenceMacros.Status.Colors.Green
@@ -17,11 +23,123 @@ $_integrationServicesExecutionConfiguration = @{
     DateTimeFormat = "yyyy-MM-dd HH:mm:ss"
 }
 
+$_integrationServicesPageLabels = @{
+    Package = 'integration-services-package'
+}
+
+###############################################################
+#  package formatting                                         #
+###############################################################
+
+function Get-IntegrationServicesPackageConfluencePageDefaultTitle($PackageName,$PackageId) {
+    "{0} {1}" -f $PackageName,$_integrationServicesPackageConfiguration.PageNameSuffix
+}
+
+function Add-IntegrationServicesPackageConfluencePage($ConfluenceConnection,$Catalog,$Package, $SpaceKey, $AncestorID = -1) {
+    $pageContents = Format-IntegrationServicesPackageConfluencePage -Package $Package -Catalog $Catalog
+    $title = Get-IntegrationServicesPackageConfluencePageDefaultTitle -PackageName $Package.Name -PackageId $Package.PackageId
+    $newPage = Add-ConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $SpaceKey -Title $title -Contents $pageContents -AncestorID $AncestorID
+    $newPage
+    Add-ConfluencePageLabel -ConfluenceConnection $ConfluenceConnection -PageID $newPage.id -LabelName $_integrationServicesPageLabels.Package
+}
+
+function Update-IntegrationServicesPackageConfluencePage($ConfluenceConnection,$Catalog,$Package,$Page,$Title="") {
+    # use an updated title, or keep the old title if a new one is not supplied
+    $updateTitle = (&{if($Title -eq "") {$Page.title} else {$Title}})
+
+    # get the content map
+    $contentMap = (Get-ConfluenceContentMap -TemplateContent $Page.body.storage.value -UserContentMap $_integrationServicesPackageConfiguration.ContentMap)
+
+    # render the content
+    $pageContents = Format-IntegrationServicesPackageConfluencePage -Package $Package -ContentMap $contentMap -Catalog $Catalog
+
+    # post the update
+    Update-ConfluencePage -ConfluenceConnection $ConfluenceConnection -PageID $Page.id -CurrentVersion $Page.version.number -Title $updateTitle -Contents $pageContents
+
+    # determine if we need to add a label as well
+    $label = $Page.metadata.labels.results | Where-Object {$_.name -eq $_integrationServicesPageLabels.Package}
+    if (-not $label) {
+        Add-ConfluencePageLabel -ConfluenceConnection $ConfluenceConnection -PageID $Page.id -LabelName $_integrationServicesPageLabels.Package
+    }
+}
+
+function Publish-IntegrationServicesPackageConfluencePage($ConfluenceConnection,$Catalog,$Package,$SpaceKey,$Title="",$AncestorID = -1) {
+    # search using the supplied title (if one is given) or the name of the job as the title
+    $searchTitle = (&{if($Title -eq "") {Get-IntegrationServicesPackageConfluencePageDefaultTitle -PackageName $Package.Name -PackageId $Package.PackageId} else {$Title}})
+    
+    #look for an existing page
+    $page = Get-ConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $SpaceKey -Title $searchTitle -Expand @("body.storage","version","metadata.labels")
+    if ($page) {
+        # update the page if it exists
+        Update-IntegrationServicesPackageConfluencePage -ConfluenceConnection $ConfluenceConnection -Page $page -Package $Package -Title $searchTitle -Catalog $Catalog
+    } else {
+        #create one if it doesn't
+        Add-IntegrationServicesPackageConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $SpaceKey -Title $searchTitle -AncestorID $AncestorID -Package $Package -Catalog $Catalog
+    }
+}
+
+function Format-IntegrationServicesPackageConfluencePage($Catalog,$Package,$ContentMap=$null) {
+    $userProps = (Format-IntegrationServicesPackageDefaultUserProperties)
+    $userContent = (Format-ConfluenceDefaultUserSection)
+    $executions = Get-IntegrationServicesPackageExecutions -Catalog $Catalog -PackageName $Package.Name -ProjectName $Package.Parent.Name -FolderName $Package.Parent.Parent.Name
+
+    if ($ContentMap -ne $null) {
+        $userProps = $ContentMap[0][0].Content
+        $userContent = $ContentMap[1].Content
+    }
+
+    $map = @(
+            @(
+                @{Generated=$false;Content=$userProps},
+                @{Generated=$true;Content=(Format-IntegrationServicesPackagePageProperties -Package $Package)}
+            ),
+            @{Generated=$false;Content=$userContent},
+            @{Generated=$true;Content=(Format-IntegrationServicesExecutions -Executions $executions)}
+        )
+    Format-ConfluencePageBase -ContentMap $map
+}
+
+function Format-IntegrationServicesPackageDefaultUserProperties($Title="User Properties") {
+    $props = @()
+
+    $propNames = $_integrationServicesPackageConfiguration.DefaultUserProperties
+    foreach($name in $propNames) {
+        $props += @{"$name"=""}
+    }
+    $content = (Format-ConfluenceHtml -Tag "h1" -Contents $Title) + (Format-ConfluencePagePropertiesMacro -Properties $props)
+    Format-ConfluenceCell -Contents $content
+}
+
+function Format-IntegrationServicesPackagePageProperties($Package,$Title="Package Properties") {
+    $proj = $Package.Parent
+    $folder = $proj.Parent
+    $desc = $Package.Description
+    $props = @(
+        @{Name=$Package.Name},
+        @{Project=$proj.Name},
+        @{Folder=$folder.Name},
+        @{Description=(&{if($desc -ne ""){[System.Net.WebUtility]::HtmlEncode($desc)}else{"N/A"}})},
+        @{EntryPoint=(Format-ConfluenceIcon -Icon $Package.EntryPoint)}
+    )
+
+    # return
+    (Format-ConfluenceHtml -Tag "h1" -Contents $Title) + (Format-ConfluencePagePropertiesMacro -Properties $props)
+}
+
+function Get-IntegrationServicesPackageExecutions($Catalog,$FolderName,$ProjectName,$PackageName)
+{
+    $Catalog.Executions | Where-Object {($_.FolderName -eq $FolderName) -and ($_.ProjectName -eq $ProjectName) -and ($_.PackageName -eq $PackageName)}
+}
+
+function Get-IntegrationServicesRecentExecutions($Executions,$Count=50) {
+    ($Executions | Sort-Object -Property StartTime -Descending)[0..$Count]
+}
+
 ###############################################################
 #  package execution formatting                               #
 ###############################################################
 
-function Format-IntegrationServicesPackageExecutions ($Executions,[switch]$IncludePackage) {
+function Format-IntegrationServicesExecutions ($Executions,[switch]$IncludePackage) {
     # build the table
     $rows = @()
     
@@ -75,8 +193,8 @@ function Format-IntegrationServicesPackageExecutions ($Executions,[switch]$Inclu
     $title + $table
 }
 
-function Format-IntegrationServicesExecutionManifestConfluencePage($Executions,$UserSection=(Format-ConfluenceDefaultUserSection)) {
-    Format-IntegrationServicesPackageExecutions -Executions $Executions -IncludePackage
+function Format-IntegrationServicesExecutionManifestConfluencePage($Executions,$ContentMap=$null) {
+    Format-IntegrationServicesExecutions -Executions $Executions -IncludePackage
 }
 
 ###############################################################
@@ -93,11 +211,11 @@ function Update-IntegrationServicesExecutionManifestConfluencePage($ConfluenceCo
     # use an updated title, or keep the old title if a new one is not supplied
     $updateTitle = (&{if($Title -eq "") {$Page.title} else {$Title}})
 
-    # get the user-generated content
-    $userContent = (Get-ConfluenceUserContent -TemplateContent $Page.body.storage.value)[1]
+    # get the content map
+    $contentMap = (Get-ConfluenceContentMap -TemplateContent $Page.body.storage.value -UserContentMap @($false))
 
     # render the content
-    $pageContents = Format-IntegrationServicesExecutionManifestConfluencePage -Executions $Executions -UserSection $userContent
+    $pageContents = Format-IntegrationServicesExecutionManifestConfluencePage -Executions $Executions -ContentMap $contentMap
 
     # post the update
     Update-ConfluencePage -ConfluenceConnection $ConfluenceConnection -PageID $Page.id -CurrentVersion $Page.version.number -Title $updateTitle -Contents $pageContents

@@ -37,7 +37,7 @@ $content -join "`n"
 # refresh a full SqlAgentJob manifest  #
 ########################################
 
-
+<#
 $scheduleTitle = "Job Schedule - Blue DEV Jobs"
 
 $manifest = Publish-SqlAgentJobManifestConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -PageTitle "SQL Agent Jobs - Blue DEV" -SchedulePageTitle $scheduleTitle

@@ -306,7 +306,7 @@ function Format-SqlAgentJobConfluencePageProperties($SqlAgentJob) {
         @{Created = Format-ConfluenceDate($SqlAgentJob.DateCreated)},
         @{"Last Modified" = Format-ConfluenceDate($SqlAgentJob.DateLastModified)}
     )
-    Format-ConfluencePagePropertiesBase -Properties $properties
+    (Format-ConfluenceHtml -Tag "h1" -Contents "Properties") + (Format-ConfluencePagePropertiesMacro -Properties $properties)
 }
 
 function Format-SqlAgentJobConfluencePageSchedules($SqlAgentJob) {
