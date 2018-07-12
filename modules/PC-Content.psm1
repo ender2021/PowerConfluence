@@ -247,11 +247,39 @@ function Format-AutomationWarning() {
     Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents "$param$body"
 }
 
-function Format-ConfluencePageBase($GeneratedContent, $UserSection) {
-    #TODO - update this function to accept a content array that combines generated and user content
+function Format-ConfluenceAutomatedSection($GeneratedContent,$SectionType=$PC_ConfluenceTemplates.Layout.SectionDefaultType) {
     $contents = (Format-AutomationWarning) + $GeneratedContent + (Format-ConfluenceHtml -Tag "hr")
-    $generatedSection = Format-ConfluenceSection -Contents (Format-ConfluenceCell -Contents $contents)
-    Format-ConfluenceLayout -Contents "$generatedSection$UserSection"
+    Format-ConfluenceSection -Contents (Format-ConfluenceCell -Contents $contents) -Type $SectionType
+}
+
+function Format-ConfluenceAutomatedCell($GeneratedContent) {
+    $contents = (Format-AutomationWarning) + $GeneratedContent
+    Format-ConfluenceCell -Contents $contents
+}
+
+function Format-ConfluencePageBase($ContentMap) {
+    $content = @()
+
+    foreach ($i in $ContentMap) {
+        switch ($i.GetType().Name) {
+            Hashtable {
+                $content += (&{if($i.Generated){Format-ConfluenceAutomatedSection -GeneratedContent $i.Content}else{$i.Content}})
+            }
+            "Object[]" {
+                $sectionContents = @()
+                foreach ($j in $i) {
+                    if ($j.GetType().Name -ne "Hashtable") { Throw "ContentMap is malformed at $i`[$j`]"}
+                    $sectionContents += (&{if($j.Generated){Format-ConfluenceAutomatedCell -GeneratedContent $j.Content}else{$j.Content}})
+                }
+                # add the cells to the user contents array
+                $content += $sectionContents
+            }
+            Default {
+                Throw "Unrecognized value in ContentMap: $i"
+            }
+        }
+    }
+    Format-ConfluenceLayout -Contents "$content"
 }
 
 function Format-ConfluencePagePropertiesBase($Properties) {
@@ -269,7 +297,7 @@ function Format-ConfluencePagePropertiesBase($Properties) {
     (Format-ConfluenceHtml -Tag "h1" -Contents "Properties") + $propMacro
 }
 
-function Get-ConfluenceUserContent($TemplateContent,$UserSectionMap = $PC_ConfluenceTemplates.Layout.UserSection.DefaultMap) {
+function Get-ConfluenceContentMap($TemplateContent,$UserContentMap = $PC_ConfluenceTemplates.Layout.UserSection.DefaultMap) {
     #start an array to track the content we find
     $userContent = @()
 
@@ -277,30 +305,30 @@ function Get-ConfluenceUserContent($TemplateContent,$UserSectionMap = $PC_Conflu
     $sections = Get-ConfluenceSections -StorageFormat $TemplateContent
     
     # make sure the map matches the content we have, count-wise
-    if ($sections.Count -ne $UserSectionMap.Count) { Throw "There is a mis-match between number of sections in the supplied UserSectionMap and the content"}
+    if ($sections.Count -ne $UserContentMap.Count) { Throw "There is a mis-match between number of sections in the supplied UserContentMap and the content"}
 
     # loop through the map and grab the content we need
-    for($i=0;$i -lt $UserSectionMap.Count;$i++) {
-        switch ($UserSectionMap[$i].GetType().Name) {
+    for($i=0;$i -lt $UserContentMap.Count;$i++) {
+        switch ($UserContentMap[$i].GetType().Name) {
             Boolean {
-                $userContent += (&{if($UserSectionMap[$i]) {$sections[$i]} else {$null}})
+                $userContent += (&{if($UserContentMap[$i]) {@{Content=$sections[$i];Generated=$false}} else {@{Content=$null;Generated=$true}}})
             }
             "Object[]" {
                 # get the cells
                 $cells = Get-ConfluenceCells -StorageFormat $sections[$i]
-                $cellMap = $UserSectionMap[$i]
+                $cellMap = $UserContentMap[$i]
                 # make sure the map matches the content we have, count-wise
-                if ($cells.Count -ne $cellMap.Count) { Throw "There is a mis-match between the number of cells in a section in supplied UserSectionMap and the content"}
+                if ($cells.Count -ne $cellMap.Count) { Throw "There is a mis-match between the number of cells in a section in supplied UserContentMap and the content"}
                 # loop through the map and grab the content we need
                 $cellContent = @()
                 for($j=0;$j -lt $cellMap.Count;$j++) {
-                    $cellContent += (&{if($cellMap[$j]) {$cells[$j]} else {$null}})                    
+                    $cellContent += (&{if($cellMap[$j]) {@{Content=$cells[$j];Generated=$false}} else {@{Content=$null;Generated=$true}}})                    
                 }
                 # add the cells to the user contents array
                 $userContent += ,$cellContent
             }
             Default {
-                Throw "Unrecognized value in UserSectionMap"
+                Throw "Unrecognized value in UserContentMap"
             }
         }
     }

@@ -172,9 +172,13 @@ function Format-SqlAgentJobManifestConfluencePage($SchedulePageTitle="", $UserSe
     # add the page properties report
     $pageContents += Format-ConfluenceHtml -Tag "h1" -Contents $_sqlAgentJobManifestConfiguration.PagePropertiesMacro.Title
     $pageContents += Format-ConfluencePagePropertiesReportMacro -Cql $_sqlAgentJobManifestConfiguration.PagePropertiesMacro.Cql -PageSize $_sqlAgentJobManifestConfiguration.PagePropertiesMacro.PageSize -FirstColumn $_sqlAgentJobManifestConfiguration.PagePropertiesMacro.FirstColumn -Headings $_sqlAgentJobManifestConfiguration.PagePropertiesMacro.Headings -SortBy $_sqlAgentJobManifestConfiguration.PagePropertiesMacro.SortBy
-    
-    # done!
-    Format-ConfluencePageBase -GeneratedContent $pageContents -UserSection $UserSection    
+
+    $map = $ContentMap
+    if ($map -eq $null) {$map=@($null,@{Generated=$false;Content=Format-ConfluenceDefaultUserSection})}
+    $map[0] = @{Generated=$true;Content=$pageContents}
+
+    # return
+    Format-ConfluencePageBase -ContentMap $map
 }
 
 function Add-SqlAgentJobManifestConfluencePage($ConfluenceConnection,$SpaceKey,$PageTitle,$SchedulePageTitle,$AncestorID=-1) {
@@ -186,11 +190,11 @@ function Update-SqlAgentJobManifestConfluencePage($ConfluenceConnection,$Page,$P
     # use an updated title, or keep the old title if a new one is not supplied
     $updateTitle = (&{if($PageTitle -eq "") {$Page.title} else {$PageTitle}})
 
-    # get the user-generated content
-    $userContent = (Get-ConfluenceUserContent -TemplateContent $Page.body.storage.value)[1]
+    # get the content map
+    $contentMap = (Get-ConfluenceContentMap -TemplateContent $Page.body.storage.value)
 
     # render the content
-    $pageContents = Format-SqlAgentJobManifestConfluencePage -SchedulePageTitle $SchedulePageTitle -UserSection $userContent
+    $pageContents = Format-SqlAgentJobManifestConfluencePage -SchedulePageTitle $SchedulePageTitle -ContentMap $contentMap
 
     # post the update
     Update-ConfluencePage -ConfluenceConnection $ConfluenceConnection -PageID $Page.id -CurrentVersion $Page.version.number -Title $updateTitle -Contents $pageContents
@@ -212,7 +216,7 @@ function Publish-SqlAgentJobManifestConfluencePage($ConfluenceConnection,$SpaceK
 # sql agent schedule summary page utilities #
 #############################################
 
-function Format-SqlAgentScheduleSummaryConfluencePage($Schedules, $UserSection=(Format-ConfluenceDefaultUserSection)) {
+function Format-SqlAgentScheduleSummaryConfluencePage($Schedules, $ContentMap=$null) {
     $rows = @()
     
     # create the header row
@@ -243,9 +247,15 @@ function Format-SqlAgentScheduleSummaryConfluencePage($Schedules, $UserSection=(
     # pull it all together
     $title = Format-ConfluenceHtml -Tag "h1" -Contents "SQL Agent Job Schedule Summary"    
     $table = Format-ConfluenceHtmlTable -Rows $rows
-    
+
+    $pageContent = $title + $table
+
+    $map = $ContentMap
+    if ($map -eq $null) {$map=@($null,@{Generated=$false;Content=Format-ConfluenceDefaultUserSection})}
+    $map[0] = @{Generated=$true;Content=$pageContent}
+
     # return
-    Format-ConfluencePageBase -GeneratedContent ($title + $table) -UserSection $UserSection    
+    Format-ConfluencePageBase -ContentMap $map
 }
 
 function Add-SqlAgentScheduleSummaryConfluencePage($ConfluenceConnection,$SpaceKey,$AncestorID=-1,$Title="",$Schedules) {
@@ -258,11 +268,11 @@ function Update-SqlAgentScheduleSummaryConfluencePage($ConfluenceConnection,$Pag
     # use an updated title, or keep the old title if a new one is not supplied
     $updateTitle = (&{if($Title -eq "") {$Page.title} else {$Title}})
 
-    # get the user-generated content
-    $userContent = (Get-ConfluenceUserContent -TemplateContent $Page.body.storage.value)[1]
+    # get the content map
+    $contentMap = (Get-ConfluenceContentMap -TemplateContent $Page.body.storage.value)
 
     # render the content
-    $pageContents = Format-SqlAgentScheduleSummaryConfluencePage -Schedules $Schedules -UserSection $userContent
+    $pageContents = Format-SqlAgentScheduleSummaryConfluencePage -Schedules $Schedules -ContentMap $contentMap
 
     # post the update
     Update-ConfluencePage -ConfluenceConnection $ConfluenceConnection -PageID $Page.id -CurrentVersion $Page.version.number -Title $updateTitle -Contents $pageContents
@@ -380,12 +390,15 @@ function Format-SqlAgentJobConfluencePageSteps($SqlAgentJob) {
     "$header$note$table"
 }
 
-function Format-SqlAgentJobConfluencePage($SqlAgentJob, $UserSection = (Format-ConfluenceDefaultUserSection)) {
+function Format-SqlAgentJobConfluencePage($SqlAgentJob, $ContentMap=$null) {
     $pageContent = @()
     $pageContent += Format-SqlAgentJobConfluencePageProperties($SqlAgentJob)
     $pageContent += Format-SqlAgentJobConfluencePageSchedules($SqlAgentJob)
     $pageContent += Format-SqlAgentJobConfluencePageSteps($SqlAgentJob)
-    Format-ConfluencePageBase -GeneratedContent $pageContent -UserSection $UserSection
+    $map = $ContentMap
+    if ($map -eq $null) {$map=@($null,@{Generated=$false;Content=Format-ConfluenceDefaultUserSection})}
+    $map[0] = @{Generated=$true;Content=$pageContent}
+    Format-ConfluencePageBase -ContentMap $map
 }
 
 function Add-SqlAgentJobConfluencePage($ConfluenceConnection,$SqlAgentJob, $SpaceKey, $AncestorID = -1) {
@@ -400,11 +413,11 @@ function Update-SqlAgentJobConfluencePage($ConfluenceConnection,$SqlAgentJob,$Pa
     # use an updated title, or keep the old title if a new one is not supplied
     $updateTitle = (&{if($Title -eq "") {$Page.title} else {$Title}})
 
-    # get the user-generated content
-    $userContent = (Get-ConfluenceUserContent -TemplateContent $Page.body.storage.value)[1]
+    # get the content map
+    $contentMap = (Get-ConfluenceContentMap -TemplateContent $Page.body.storage.value)
 
     # render the content
-    $pageContents = Format-SqlAgentJobConfluencePage -SqlAgentJob $SqlAgentJob -UserSection $userContent
+    $pageContents = Format-SqlAgentJobConfluencePage -SqlAgentJob $SqlAgentJob -ContentMap $contentMap
 
     # post the update
     Update-ConfluencePage -ConfluenceConnection $ConfluenceConnection -PageID $Page.id -CurrentVersion $Page.version.number -Title $updateTitle -Contents $pageContents

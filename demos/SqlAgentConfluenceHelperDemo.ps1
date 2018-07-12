@@ -37,12 +37,12 @@ $content -join "`n"
 # refresh a full SqlAgentJob manifest  #
 ########################################
 
-<#
-$scheduleTitle = "Job Schedule - GradDiv DEV Jobs"
 
-$manifest = Publish-SqlAgentJobManifestConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -PageTitle "SQL Agent Jobs - GradDiv DEV" -SchedulePageTitle $scheduleTitle
+$scheduleTitle = "Job Schedule - Blue DEV Jobs"
 
-$jobs = Get-SqlAgentJob -ServerInstance $SqlAgentServerDev | Where-Object { $_.Name.StartsWith("GradDiv", "CurrentCultureIgnoreCase") }
+$manifest = Publish-SqlAgentJobManifestConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -PageTitle "SQL Agent Jobs - Blue DEV" -SchedulePageTitle $scheduleTitle
+
+$jobs = Get-SqlAgentJob -ServerInstance $SqlAgentServerDev | Where-Object { $_.Name.StartsWith("isis", "CurrentCultureIgnoreCase") }
 
 $schedules = $jobs | Get-SqlAgentJobScheduleWithTranslation | Sort-Object -Property @{e={$_.JobEnabled -and $_.IsEnabled}; a=0},@{e={$_.JobEnabled}; a=0},FrequencyTypes,FrequencyRecurrenceFactor,ActiveStartTimeOfDay,Parent
 Publish-SqlAgentScheduleSummaryConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -Title $scheduleTitle -Schedules $schedules -AncestorID $manifest.id
@@ -75,7 +75,7 @@ foreach ($job in $jobs) {
 # refresh a SqlAgentJob profile page   #
 ########################################
 
-
+<#
 $job = Get-SqlAgentJob -ServerInstance $SqlAgentServerDev -Name "GradDiv - Download Degree Files [H] NeoBatch [Production Ready]"
 Publish-SqlAgentJobConfluencePage -ConfluenceConnection $ConfluenceConnection -SqlAgentJob $job -SpaceKey $spaceKey -AncestorID 312868932
 #>
@@ -85,8 +85,8 @@ Publish-SqlAgentJobConfluencePage -ConfluenceConnection $ConfluenceConnection -S
 ########################################
 
 <#
-$title = "Job Schedule - GradDiv DEV Jobs"
-$schedules = Get-SqlAgentJob -ServerInstance $SqlAgentServerDev | ? { $_.Name.StartsWith("GradDiv", "CurrentCultureIgnoreCase") }  | Get-SqlAgentJobScheduleWithTranslation | Sort-Object -Property @{e={$_.JobEnabled -and $_.IsEnabled}; a=0},@{e={$_.JobEnabled}; a=0},FrequencyTypes,FrequencyRecurrenceFactor,ActiveStartTimeOfDay,Parent
+$title = "Job Schedule - iSIS DEV Jobs"
+$schedules = Get-SqlAgentJob -ServerInstance $SqlAgentServerDev | ? { $_.Name.StartsWith("isis", "CurrentCultureIgnoreCase") }  | Get-SqlAgentJobScheduleWithTranslation | Sort-Object -Property @{e={$_.JobEnabled -and $_.IsEnabled}; a=0},@{e={$_.JobEnabled}; a=0},FrequencyTypes,FrequencyRecurrenceFactor,ActiveStartTimeOfDay,Parent
 Publish-SqlAgentScheduleSummaryConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -Title $title -Schedules $schedules
 #>
 
