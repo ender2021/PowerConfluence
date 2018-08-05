@@ -14,35 +14,18 @@ Import-Module .\Credentials.psm1 -Force
 
 $ConfluenceConnection = Get-ConfluenceConnection -UserName $Credentials.UserName -ApiToken $Credentials.ApiToken -HostName $Credentials.HostName
 $SqlAgentServerDev = $Credentials.SqlAgentServerDev
-$spaceKey = "GSD"
-
-########################################
-# xml experiments                      #
-########################################
-<#
-$page = Get-ConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -Title "Complex Layout Test" -Expand @("body.storage")
-$storage = $page.body.storage.value
-$content = Get-ConfluenceUserContent -TemplateContent $storage -UserSectionMap $PC_ConfluenceTemplates.Layout.UserSection.ComplexMap
-$content -join "`n"
-#$xml = [xml]($storage.Replace($PC_ConfluenceTemplates.Layout.LayoutStart, $PC_ConfluenceTemplates.Layout.LayoutStartWithNamespace))
-#$xml.layout.ChildNodes
-#$items = Select-Xml -Xml $xml -XPath '/ac:section' -Namespace @{ac="confluence.atlassian.com"}
-#$items
-
-#$XPath = "/ac:layout/Type/Members/AliasProperty"
-#Select-Xml -Xml $body -XPath $Xpath | Select-Object -ExpandProperty Node
-#>
+$spaceKey = "PCTS"
 
 ########################################
 # refresh a full SqlAgentJob manifest  #
 ########################################
 
-<#
-$scheduleTitle = "Job Schedule - Blue DEV Jobs"
 
-$manifest = Publish-SqlAgentJobManifestConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -PageTitle "SQL Agent Jobs - Blue DEV" -SchedulePageTitle $scheduleTitle
+$scheduleTitle = "Job Schedule - GradDiv Prod Jobs"
 
-$jobs = Get-SqlAgentJob -ServerInstance $SqlAgentServerDev | Where-Object { $_.Name.StartsWith("isis", "CurrentCultureIgnoreCase") }
+$manifest = Publish-SqlAgentJobManifestConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -PageTitle "SQL Agent Jobs - GradDiv Prod" -SchedulePageTitle $scheduleTitle
+
+$jobs = Get-SqlAgentJob -ServerInstance $SqlAgentServerDev | Where-Object { $_.Name.StartsWith("graddiv", "CurrentCultureIgnoreCase") }
 
 $schedules = $jobs | Get-SqlAgentJobScheduleWithTranslation | Sort-Object -Property @{e={$_.JobEnabled -and $_.IsEnabled}; a=0},@{e={$_.JobEnabled}; a=0},FrequencyTypes,FrequencyRecurrenceFactor,ActiveStartTimeOfDay,Parent
 Publish-SqlAgentScheduleSummaryConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $spaceKey -Title $scheduleTitle -Schedules $schedules -AncestorID $manifest.id

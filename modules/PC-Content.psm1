@@ -264,6 +264,7 @@ function Format-ConfluencePageBase($ContentMap) {
                     if ($j.GetType().Name -ne "Hashtable") { Throw "ContentMap is malformed at $i`[$j`]"}
                     $sectionContents += (&{if($j.Generated){Format-ConfluenceAutomatedCell -GeneratedContent $j.Content}else{$j.Content}})
                 }
+                #TODO - figure out how to parse  mutli-cell sections better
                 $sectionType = switch ($i.Count) {
                     1 {"single"}
                     2 {"two_equal"}

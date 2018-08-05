@@ -2,6 +2,17 @@
 # useful string libraries #
 ###########################
 
+$_integrationServicesPackageManifestConfiguration = @{
+    PagePropertiesMacro = @{
+        Title = 'Package List'
+        Cql = "label = &quot;integration-services-package&quot; and space = currentSpace() and ancestor = currentContent()";
+        PageSize = "100"
+        FirstColumn = "Package"
+        Headings = "Name,Project,Folder"
+        SortBy = "Title"
+    }
+}
+
 $_integrationServicesPackageConfiguration = @{
     DefaultUserProperties = @("Common Name,Data Source(s),Data Destination(s),Technical Contact(s),Business Contact(s),Customer Contact(s),Related Application(s),Related Department(s)".Split(","))
     ContentMap = @(@($true,$false),$true,$false)
@@ -25,6 +36,56 @@ $_integrationServicesExecutionConfiguration = @{
 
 $_integrationServicesPageLabels = @{
     Package = 'integration-services-package'
+}
+
+#########################################
+# integration services package manifest page utilities #
+#########################################
+
+function Format-IntegrationServicesPackageManifestConfluencePage($UserSection = (Format-ConfluenceDefaultUserSection)) {
+    $pageContents = @()
+
+    # add the page properties report
+    $pageContents += Format-ConfluenceHtml -Tag "h1" -Contents $_integrationServicesPackageManifestConfiguration.PagePropertiesMacro.Title
+    $pageContents += Format-ConfluencePagePropertiesReportMacro -Cql $_integrationServicesPackageManifestConfiguration.PagePropertiesMacro.Cql -PageSize $_integrationServicesPackageManifestConfiguration.PagePropertiesMacro.PageSize -FirstColumn $_integrationServicesPackageManifestConfiguration.PagePropertiesMacro.FirstColumn -Headings $_integrationServicesPackageManifestConfiguration.PagePropertiesMacro.Headings -SortBy $_integrationServicesPackageManifestConfiguration.PagePropertiesMacro.SortBy
+
+    $map = $ContentMap
+    if ($map -eq $null) {$map=@($null,@{Generated=$false;Content=Format-ConfluenceDefaultUserSection})}
+    $map[0] = @{Generated=$true;Content=$pageContents}
+
+    # return
+    Format-ConfluencePageBase -ContentMap $map
+}
+
+function Add-IntegrationServicesPackageManifestConfluencePage($ConfluenceConnection,$SpaceKey,$PageTitle,$AncestorID=-1) {
+    $pageContents = Format-IntegrationServicesPackageManifestConfluencePage
+    Add-ConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $SpaceKey -Title $PageTitle -Contents $pageContents -AncestorID $AncestorID
+}
+
+function Update-IntegrationServicesPackageManifestConfluencePage($ConfluenceConnection,$Page,$PageTitle) {
+    # use an updated title, or keep the old title if a new one is not supplied
+    $updateTitle = (&{if($PageTitle -eq "") {$Page.title} else {$PageTitle}})
+
+    # get the content map
+    $contentMap = (Get-ConfluenceContentMap -TemplateContent $Page.body.storage.value)
+
+    # render the content
+    $pageContents = Format-IntegrationServicesPackageManifestConfluencePage -ContentMap $contentMap
+
+    # post the update
+    Update-ConfluencePage -ConfluenceConnection $ConfluenceConnection -PageID $Page.id -CurrentVersion $Page.version.number -Title $updateTitle -Contents $pageContents
+}
+
+function Publish-IntegrationServicesPackageManifestConfluencePage($ConfluenceConnection,$SpaceKey,$PageTitle,$AncestorID=-1) {
+    #look for an existing page
+    $page = Get-ConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $SpaceKey -Title $PageTitle -Expand @("body.storage","version")
+    if ($page) {
+        # update the page if it exists
+        Update-IntegrationServicesPackageManifestConfluencePage -ConfluenceConnection $ConfluenceConnection -Page $page -PageTitle $PageTitle
+    } else {
+        #create one if it doesn't
+        Add-IntegrationServicesPackageManifestConfluencePage -ConfluenceConnection $ConfluenceConnection -SpaceKey $SpaceKey -PageTitle $PageTitle -AncestorID $AncestorID
+    }
 }
 
 ###############################################################
