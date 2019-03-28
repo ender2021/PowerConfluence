@@ -1,4 +1,3 @@
 
-demos/Credentials.psm1
-demos/SSISTasks.ps1
+demos/credentials/Credentials.ps1
 .vscode/launch.json
