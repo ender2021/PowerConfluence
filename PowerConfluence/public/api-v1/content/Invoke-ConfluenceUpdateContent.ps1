@@ -15,5 +15,5 @@ function Invoke-ConfluenceUpdateContent ($ConfluenceConnection,$PageID,$CurrentV
         type = "page"
     }
     
-    Send-ConfluenceRestRequest -ConfluenceConnection $ConfluenceConnection -FunctionAddress "content/$PageID" -HttpMethod Put -Body $messageBody
+    Invoke-ConfluenceRestMethod -ConfluenceConnection $ConfluenceConnection -FunctionAddress "content/$PageID" -HttpMethod Put -Body $messageBody
 }

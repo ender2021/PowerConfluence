@@ -20,7 +20,7 @@ function Invoke-ConfluenceGetContent ($ConfluenceConnection,$PageID,$SpaceKey,$T
     Try
     {
         # send the request and save the results
-        $results = Send-ConfluenceRestRequest $ConfluenceConnection -FunctionAddress $functionStr -HttpMethod Get
+        $results = Invoke-ConfluenceRestMethod $ConfluenceConnection -FunctionAddress $functionStr -HttpMethod Get
 
         # if we didn't so a search by id, the results will be in list format
         # pull the result out of the list to return, or throw an error if there's not exactly 1 result

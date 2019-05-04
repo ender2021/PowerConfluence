@@ -1,0 +1,64 @@
+{
+	// Place your PowerConfluence workspace snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and 
+	// description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope 
+	// is left empty or omitted, the snippet gets applied to all languages. The prefix is what is 
+	// used to trigger the snippet and the body will be expanded and inserted. Possible variables are: 
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. 
+	// Placeholders with the same ids are connected.
+	// Example:
+	// "Print to console": {
+	// 	"scope": "javascript,typescript",
+	// 	"prefix": "log",
+	// 	"body": [
+	// 		"console.log('$1');",
+	// 		"$2"
+	// 	],
+	// 	"description": "Log output to console"
+	// }
+	"Parameter Checker": {
+		"scope":"powershell",
+		"prefix":"checkparam",
+		"body" : [
+			"if(\\$PSBoundParameters.ContainsKey(\"${1}\")){\\${3}.Add(\"${2}\",\\$${1})}"
+		],
+		"description": "Snippet for adding an item to a hashtable if a named function parameter is set"
+	},
+	"Invoke-Confluence cmdlet": {
+		"scope":"powershell",
+		"prefix":"iccmdlet",
+		"body" : [
+			"#",
+			"function Invoke-Confluence$1 {",
+			"\t[CmdletBinding()]",
+			"\tparam (\n\n\n",
+			"\t\t# The ConfluenceConnection object to use for the request",
+			"\t\t[Parameter()]",
+			"\t\t[hashtable]",
+			"\t\t\\$ConfluenceConnection",
+			"\t)",
+			"\tbegin {",
+			"\t\t\\$results = @()",
+			"\t}",
+			"\tprocess {",
+			"\t\t\\$functionPath = \"\"",
+			"\t\t\\$verb = \"\"\n",
+			"\t\t\\$query=@{}",
+			"\t\t\\$body=@{}\n",
+			"\t\t\\$results += Invoke-ConfluenceRestMethod \\$ConfluenceConnection \\$functionPath \\$verb -Query \\$query -Body \\$body",
+			"\t}",
+			"\tend {",
+			"\t\t\\$results",
+			"\t}",
+			"}"
+		],
+		"description": "Snippet for templating a new Invoke-Confluence* API wrapper"
+	},
+	"breakpoint": {
+		"scope":"powershell",
+		"prefix": "breakpoint",
+		"body": [
+			"Read-Host -Prompt \"Press any key to continue or CTRL+C to quit\""
+		],
+		"description": "Insert a breakpoint"
+	}
+}

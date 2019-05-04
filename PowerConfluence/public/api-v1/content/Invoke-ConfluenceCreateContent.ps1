@@ -18,5 +18,5 @@ function Invoke-ConfluenceCreateContent ($ConfluenceConnection,$SpaceKey,$Ancest
         $messageBody.Add("ancestors", @(@{id=$AncestorID}))
     }
     
-    Send-ConfluenceRestRequest -ConfluenceConnection $ConfluenceConnection -FunctionAddress "content" -HttpMethod Post -Body $messageBody
+    Invoke-ConfluenceRestMethod -ConfluenceConnection $ConfluenceConnection -FunctionAddress "content" -HttpMethod Post -Body $messageBody
 }
