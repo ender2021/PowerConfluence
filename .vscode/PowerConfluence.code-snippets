@@ -15,14 +15,6 @@
 	// 	],
 	// 	"description": "Log output to console"
 	// }
-	"Parameter Checker": {
-		"scope":"powershell",
-		"prefix":"checkparam",
-		"body" : [
-			"if(\\$PSBoundParameters.ContainsKey(\"${1}\")){\\${3}.Add(\"${2}\",\\$${1})}"
-		],
-		"description": "Snippet for adding an item to a hashtable if a named function parameter is set"
-	},
 	"Invoke-Confluence cmdlet": {
 		"scope":"powershell",
 		"prefix":"iccmdlet",

@@ -1,5 +1,5 @@
 #https://developer.atlassian.com/cloud/confluence/rest/#api-content-id-get
-function Invoke-ConfluenceGetContent ($ConfluenceConnection,$PageID,$SpaceKey,$Title,$Expand=$()) {
+function Invoke-ConfluenceGetContentById ($ConfluenceConnection,$PageID,$SpaceKey,$Title,$Expand=$()) {
     
     # create the expand parameter, if any were requested
     $expandString = (&{if($Expand.Count -gt 0) {"expand=" + ($Expand -join ",") } else {""}})

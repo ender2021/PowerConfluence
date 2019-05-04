@@ -13,6 +13,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #@(755826903,747111944) | Invoke-ConfluenceAddLabelsToContent -Label "test2"
 #@("test3","test4") | Invoke-ConfluenceAddLabelsToContent 755826903
 
+#GET CONTENT
+#Invoke-ConfluenceGetContent "Test Page" "~justin.mead"
+
 #end tests
 
 #close the Confluence session
