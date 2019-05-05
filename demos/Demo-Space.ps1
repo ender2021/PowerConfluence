@@ -14,6 +14,10 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #Invoke-ConfluenceGetSpaces "GA"
 #@("GA","CR","GCCW") | Invoke-ConfluenceGetSpaces
 
+#GET SPACE
+#Invoke-ConfluenceGetSpace "GA"
+#@("GA","CR","GCCW") | Invoke-ConfluenceGetSpace
+
 #end tests
 
 #close the Confluence session
