@@ -24,8 +24,9 @@ function Invoke-ConfluenceCreateContent {
 
         # The body of the content.  Use New-ConfluenceContentBody
         [Parameter(Mandatory,Position=2,ValueFromPipelineByPropertyName)]
+        [Alias("Body")]
         [pscustomobject]
-        $Body,
+        $ContentBody,
 
         # The ID of the content parent
         [Parameter(Position=3,ValueFromPipelineByPropertyName)]
@@ -70,17 +71,17 @@ function Invoke-ConfluenceCreateContent {
         $query=@{}
         if($PSBoundParameters.ContainsKey("Expand")){$query.Add("expand",$Expand -join ",")}
 
-        $restBody=@{
+        $body=@{
             space = @{key=$SpaceKey}
             type = $Type
             title = $Title
             status = $Status
-            body = $Body
+            body = $ContentBody
         }
         if($PSBoundParameters.ContainsKey("ParentId")){$body.Add("ancestors",@{id=$ParentId})}
         if($PSBoundParameters.ContainsKey("Id")){$body.Add("id",$Id)}
 
-        $results += Invoke-ConfluenceRestMethod $ConfluenceConnection $functionPath $verb -Query $query -Body $restBody
+        $results += Invoke-ConfluenceRestMethod $ConfluenceConnection $functionPath $verb -Query $query -Body $body
     }
     end {
         $results

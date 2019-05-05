@@ -23,6 +23,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #CREATE CONTENT
 #@("auto test 1","auto test 2") | Invoke-ConfluenceCreateContent "~justin.mead" -Body (New-ConfluenceContentBody "")
 
+#UPDATE CONTENT
+#Invoke-ConfluenceGetContentById 755794103 | ForEach-Object {$_.title += " (Edited)";$_} | Invoke-ConfluenceUpdateContent
+
 #end tests
 
 #close the Confluence session
