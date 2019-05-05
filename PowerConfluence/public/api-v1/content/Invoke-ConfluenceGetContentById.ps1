@@ -1,45 +1,72 @@
+$ConfluenceContentExpand = @("childTypes.all","childTypes.attachment","childTypes.comment","childTypes.page",
+                             "container","metadata.currentuser","metadata.properties","metadata.labels",
+                             "metadata.frontend","operations","children.page","children.attachment","children.comment",
+                             "restrictions.read.restrictions.user","restrictions.read.restrictions.group",
+                             "restrictions.update.restrictions.user","restrictions.update.restrictions.group",
+                             "history","history.lastUpdated","history.previousVersion","history.contributors",
+                             "history.nextVersion","ancestors","body","version","descendants.page",
+                             "descendants.attachment","descendants.comment","space")
+
 #https://developer.atlassian.com/cloud/confluence/rest/#api-content-id-get
-function Invoke-ConfluenceGetContentById ($ConfluenceConnection,$PageID,$SpaceKey,$Title,$Expand=$()) {
-    
-    # create the expand parameter, if any were requested
-    $expandString = (&{if($Expand.Count -gt 0) {"expand=" + ($Expand -join ",") } else {""}})
-    
-    if ($PageID) {
-        # if a pageID is supplied, do a Get Content by ID call
-        $functionStr = "content/$PageID" + (&{if($expandString -ne "") { "`?$expandString" } else {""}})
-    } elseif ($SpaceKey -and $Title) {
-        # if a space key and title are supplied, do a Get Content call filtered by space and title
-        $encodedTitle = [System.Web.HttpUtility]::UrlEncode($Title) 
-        $functionStr = "content?title=$encodedTitle&spaceKey=$SpaceKey" + (&{if($expandString -ne "") { "&$expandString" } else {""}})
-    } else {
-        # if none of the necessary search parameters were supplied, send the fool packing
-        Throw "You must provide either a -PageID or -SpaceKey and -Title!"
+function Invoke-ConfluenceGetContentById {
+    [CmdletBinding()]
+    param (
+        # The Id of the content to retrieve
+        [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [Alias("ContentId")]
+        [int32]
+        $Id,
+
+        # Status of content to retrieve
+        [Parameter(Position=1,ValueFromPipelineByPropertyName)]
+        [ValidateSet("current", "trashed", "any", "draft")]
+        [string]
+        $Status = "current",
+
+        # The version number to return
+        [Parameter(Position=2,ValueFromPipelineByPropertyName)]
+        [int32]
+        $Version,
+
+        # Used to expand additional attributes
+        [Parameter(Position=3,ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Compare-StringArraySubset $ConfluenceContentExpand $_ })]
+        [string[]]
+        $Expand,
+
+        # Set this flag to render embeded contents as the version they were when the content was saved
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $EmbedRenderAtSave,
+
+        # Set this flag to triggered the "viewed" event for the content
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $TriggerView,
+
+        # The ConfluenceConnection object to use for the request
+        [Parameter(Position=4)]
+        [hashtable]
+        $ConfluenceConnection
+    )
+    begin {
+        $results = @()
     }
+    process {
+        $functionPath = "/wiki/rest/api/content/$Id"
+        $verb = "GET"
 
-    # wrap the call in a Try/Catch in case we get a 400 error
-    Try
-    {
-        # send the request and save the results
-        $results = Invoke-ConfluenceRestMethod $ConfluenceConnection -FunctionAddress $functionStr -HttpMethod Get
-
-        # if we didn't so a search by id, the results will be in list format
-        # pull the result out of the list to return, or throw an error if there's not exactly 1 result
-        if (-not $PageID) {
-            if ($results.size = 1) {
-                $results = $results.results[0]
-            } else {
-                Throw "No page found"
-            }
+        $query=@{
+            status = $Status
+            embeddedContentRender = IIF $EmbedRenderAtSave "version-at-save" "current"
         }
+        if($PSBoundParameters.ContainsKey("Version")){$query.Add("version",$Version)}
+        if($PSBoundParameters.ContainsKey("Expand")){$query.Add("expand",$Expand -join ",")}
+        if($TriggerView){$query.Add("trigger","viewed")}
 
+        $results += Invoke-ConfluenceRestMethod $ConfluenceConnection $functionPath $verb -Query $query
     }
-    Catch
-    {
-        # if anything went wrong, just set the results to null and let the caller handle it
-        $results = $null
-    }
-    Finally {
-        # no matter what happens, return something
-        $results    
+    end {
+        $results
     }
 }

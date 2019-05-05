@@ -16,6 +16,10 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #GET CONTENT
 #Invoke-ConfluenceGetContent "Test Page" "~justin.mead"
 
+#GET CONTENT BY ID
+#Invoke-ConfluenceGetContentById 755826903
+#@(755826903,747111944) | Invoke-ConfluenceGetContentById
+
 #end tests
 
 #close the Confluence session
