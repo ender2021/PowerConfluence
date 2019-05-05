@@ -20,6 +20,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #Invoke-ConfluenceGetContentById 755826903
 #@(755826903,747111944) | Invoke-ConfluenceGetContentById
 
+#CREATE CONTENT
+#@("auto test 1","auto test 2") | Invoke-ConfluenceCreateContent "~justin.mead" -Body (New-ConfluenceContentBody "")
+
 #end tests
 
 #close the Confluence session
