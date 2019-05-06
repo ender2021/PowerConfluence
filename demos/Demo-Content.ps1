@@ -33,6 +33,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #DELETE CONTENT
 #17006719 | Invoke-ConfluenceDeleteContent
 
+#GET CONTENT CHILDREN
+(Invoke-ConfluenceGetContentChildren 17137665 -Expand "attachment").attachment
+
 #end tests
 
 #close the Confluence session
