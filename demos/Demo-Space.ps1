@@ -21,6 +21,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #CREATE SPACE
 #Invoke-ConfluenceCreateSpace "JPT" "Justin Powershell Testing" "A space where justin tests some powershell stuff"
 
+#UPDATE SPACE
+#Invoke-ConfluenceUpdateSpace "JPT" "Justin's PowerShell Testing"
+
 #end tests
 
 #close the Confluence session
