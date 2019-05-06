@@ -1,5 +1,5 @@
 #https://developer.atlassian.com/cloud/confluence/rest/#api-content-id-child-attachment-post
-function Invoke-ConfluenceCreateAttachment {
+function Invoke-ConfluenceCreateOrUpdateAttachment {
     [CmdletBinding()]
     param (
         # The ID of the content to create an attachment for
@@ -29,6 +29,11 @@ function Invoke-ConfluenceCreateAttachment {
         [switch]
         $MinorEdit,
 
+        # Set this flag to force a create, throwing an error if the attachment already exists
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ForceCreate,
+
         # The ConfluenceConnection object to use for the request
         [Parameter(Position=4)]
         [hashtable]
@@ -41,7 +46,7 @@ function Invoke-ConfluenceCreateAttachment {
         $RestArgs = @{
             ConfluenceConnection = $ConfluenceConnection
             FunctionPath = "/wiki/rest/api/content/$ContentId/child/attachment"
-            HttpMethod = "POST"
+            HttpMethod = IIF $ForceCreate "POST" "PUT"
             Query = @{
                 status = $Status
             }

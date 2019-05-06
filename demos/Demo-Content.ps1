@@ -26,8 +26,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #UPDATE CONTENT
 #Invoke-ConfluenceGetContentById 755794103 | ForEach-Object {$_.title += " (Edited)";$_} | Invoke-ConfluenceUpdateContent
 
-#CREATE ATTACHMENT
-#Get-Item $PSScriptRoot\SampleAttachment* | Invoke-ConfluenceCreateAttachment 17137665
+#CREATE OR UPDATE ATTACHMENT
+#Get-Item $PSScriptRoot\SampleAttachment* | Invoke-ConfluenceCreateOrUpdateAttachment 17137665
+#Get-Item $PSScriptRoot\SampleAttachment* | Invoke-ConfluenceCreateOrUpdateAttachment 17137665 -ForceCreate
 
 #end tests
 
