@@ -18,6 +18,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #Invoke-ConfluenceGetSpace "GA"
 #@("GA","CR","GCCW") | Invoke-ConfluenceGetSpace
 
+#CREATE SPACE
+#Invoke-ConfluenceCreateSpace "JPT" "Justin Powershell Testing" "A space where justin tests some powershell stuff"
+
 #end tests
 
 #close the Confluence session
