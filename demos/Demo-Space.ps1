@@ -24,6 +24,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #UPDATE SPACE
 #Invoke-ConfluenceUpdateSpace "JPT" "Justin's PowerShell Testing"
 
+#DELETE SPACE
+#"JPT" | Invoke-ConfluenceDeleteSpace
+
 #end tests
 
 #close the Confluence session
