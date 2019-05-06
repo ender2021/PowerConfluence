@@ -21,10 +21,13 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #@(755826903,747111944) | Invoke-ConfluenceGetContentById
 
 #CREATE CONTENT
-#@("auto test 1","auto test 2") | Invoke-ConfluenceCreateContent "~justin.mead" -Body (New-ConfluenceContentBody "")
+#@("auto test 1","auto test 2") | Invoke-ConfluenceCreateContent "JPT" -Body (New-ConfluenceContentBody "")
 
 #UPDATE CONTENT
 #Invoke-ConfluenceGetContentById 755794103 | ForEach-Object {$_.title += " (Edited)";$_} | Invoke-ConfluenceUpdateContent
+
+#CREATE ATTACHMENT
+#Get-Item $PSScriptRoot\SampleAttachment* | Invoke-ConfluenceCreateAttachment 17137665
 
 #end tests
 
