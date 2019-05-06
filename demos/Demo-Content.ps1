@@ -30,6 +30,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #Get-Item $PSScriptRoot\SampleAttachment* | Invoke-ConfluenceCreateOrUpdateAttachment 17137665
 #Get-Item $PSScriptRoot\SampleAttachment* | Invoke-ConfluenceCreateOrUpdateAttachment 17137665 -ForceCreate
 
+#DELETE CONTENT
+#17006719 | Invoke-ConfluenceDeleteContent
+
 #end tests
 
 #close the Confluence session
