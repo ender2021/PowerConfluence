@@ -46,6 +46,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #GET CONTENT COMMENTS
 #Invoke-ConfluenceGetContentComments 17137665
 
+#REMOVE CONTENT LABEL
+#"test2" | Invoke-ConfluenceRemoveContentLabel 17137665
+
 #end tests
 
 #close the Confluence session
