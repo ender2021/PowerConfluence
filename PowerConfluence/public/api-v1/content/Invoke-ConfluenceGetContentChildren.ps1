@@ -12,6 +12,7 @@ function Invoke-ConfluenceGetContentChildren {
 
         # The current version of the content
         [Parameter(Position=1,ValueFromPipelineByPropertyName)]
+        [Alias("ParentVersion")]
         [int32]
         $CurrentVersion,
 
