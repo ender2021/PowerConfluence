@@ -39,6 +39,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #GET CONTENT LABELS
 #Invoke-ConfluenceGetContentLabels 17137665
 
+#GET ATTACHMENTS
+#Invoke-ConfluenceGetAttachments 17137665
+
 #end tests
 
 #close the Confluence session
