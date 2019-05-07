@@ -10,7 +10,7 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #do tests here
 
 #ADD LABELS TO CONTENT
-#@(755826903,747111944) | Invoke-ConfluenceAddLabelsToContent -Label "test2"
+#17137665 | Invoke-ConfluenceAddLabelsToContent -Label "test2"
 #@("test3","test4") | Invoke-ConfluenceAddLabelsToContent 755826903
 
 #GET CONTENT
@@ -35,6 +35,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 
 #GET CONTENT CHILDREN
 #(Invoke-ConfluenceGetContentChildren 17137665 -Expand "attachment").attachment
+
+#GET CONTENT LABELS
+#Invoke-ConfluenceGetContentLabels 17137665
 
 #end tests
 
