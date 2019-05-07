@@ -22,6 +22,7 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 
 #CREATE CONTENT
 #@("auto test 1","auto test 2") | Invoke-ConfluenceCreateContent "JPT" -Body (New-ConfluenceContentBody "")
+#Invoke-ConfluenceCreateContent JPT "comment title" (New-ConfluenceContentBody "this is a comment") -Type "comment" -ParentId 17137665
 
 #UPDATE CONTENT
 #Invoke-ConfluenceGetContentById 755794103 | ForEach-Object {$_.title += " (Edited)";$_} | Invoke-ConfluenceUpdateContent
@@ -41,6 +42,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 
 #GET ATTACHMENTS
 #Invoke-ConfluenceGetAttachments 17137665
+
+#GET CONTENT COMMENTS
+#Invoke-ConfluenceGetContentComments 17137665
 
 #end tests
 
