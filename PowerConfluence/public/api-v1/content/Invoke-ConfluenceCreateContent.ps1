@@ -78,7 +78,13 @@ function Invoke-ConfluenceCreateContent {
             status = $Status
             body = $ContentBody
         }
-        if($PSBoundParameters.ContainsKey("ParentId")){$body.Add("ancestors",@{id=$ParentId})}
+        if($PSBoundParameters.ContainsKey("ParentId")){
+            if ($Type -eq "comment") {
+                $body.Add("container",@{type="page";"id"=$ParentId})
+            } else {
+                $body.Add("ancestors",@(@{id=$ParentId}))
+            }
+        }
         if($PSBoundParameters.ContainsKey("Id")){$body.Add("id",$Id)}
 
         $results += Invoke-ConfluenceRestMethod $ConfluenceConnection $functionPath $verb -Query $query -Body $body
