@@ -1,5 +1,5 @@
 #https://developer.atlassian.com/cloud/confluence/rest/#api-content-id-label-post
-function Invoke-ConfluenceAddLabelsToContent {
+function Invoke-ConfluenceAddContentLabels {
     [CmdletBinding()]
     param (
         # The ID of the page
