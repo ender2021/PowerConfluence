@@ -7,7 +7,7 @@ $ConfluenceContentExpand = @("childTypes.all","childTypes.attachment","childType
                              "history.nextVersion","ancestors","body","version","descendants.page",
                              "descendants.attachment","descendants.comment","space")
 
-#
+#https://developer.atlassian.com/cloud/confluence/rest/#api-content-id-child-attachment-get
 function Invoke-ConfluenceGetAttachments {
     [CmdletBinding()]
     param (
