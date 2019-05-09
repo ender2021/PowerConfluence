@@ -49,6 +49,12 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #REMOVE CONTENT LABEL
 #"test2" | Invoke-ConfluenceRemoveContentLabel 17137665
 
+#CONVERT CONTENT BODY
+#Invoke-ConfluenceConvertContentBody "my unwrapped content" -FromFormat "wiki" -ToFormat "storage"
+$content = (Get-Content $PSScriptRoot\markup.txt) -join "" #
+$value = $content -replace [char]0x00a0,'-' | Invoke-ConfluenceConvertContentBody -FromFormat "wiki" -ToFormat "storage"
+$value
+
 #end tests
 
 #close the Confluence session

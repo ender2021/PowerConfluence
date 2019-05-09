@@ -1,0 +1,51 @@
+==SAIS Environments==
+
+A list of the environments and the servers within them.
+
+{TOC}
+
+
+===SA Domain Servers===
+
+See the
+* [Recommended-Solution-Stack|Recommended Solution Stack] for details on the servers technologies
+* [SAIS-WCF-Service-Environments|SAIS WCF Service Environments] for details on wcf services
+* [Web Farm - Web Farm Server Mappings.xlsx|Spreadsheet of Mappings]
+
+[[File:web-farm-servers-configuration.png]]
+
+(Diagram at: \\FAKE_SERVER\Division\Divisional IT Projects\SIS Modernization\Phase I - SIS Conversion\Application Integration\Web Farm - Web Farm Servers Diagram.ppt)
+(Spreadsheet of Mappings: \\FAKE_SERVER\Division\Divisional IT Projects\SIS Modernization\Phase I - SIS Conversion\Application Integration\Web Farm - Web Farm Server Mappings.xlsx)
+
+===Identity Servers===
+
+The servers below provide Federated Identity services. They are within the my.ucsb domain.
+Note: The backend databases for MIM Synchronization and ADFS are now housed on SA130 (sql5.sa.ucsb.edu)
+
+[image||nextGenIdentityEnvironment.png]
+
+
+ 
+===Graddiv Servers===
+
+For more complete information, see [Graduate-Division-IS-Environment|Graduate Division IS Environment].
+
+[image||graddiv-servers.png]
+
+
+
+
+===Server Composition (Network Graph)===
+
+[image||iSIS-v5c.png]
+
+(The original Visio doc is available at \\FAKE_SERVER\Division\Divisional IT Projects\SIS Modernization\Go Live Tasks and Scripts\References\System Diagrams​.)
+
+
+
+
+===SQL Server Architecture===
+
+[image||sais-environments-sql-server-architecture.png]
+
+ 
