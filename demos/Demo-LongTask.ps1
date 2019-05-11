@@ -10,7 +10,10 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #do tests here
 
 #GET LONG RUNNING TASKS
-(Invoke-ConfluenceGetLongRunningTasks).results
+#(Invoke-ConfluenceGetLongRunningTasks).results
+
+#GET LONG RUNNING TASK
+#Invoke-ConfluenceGetLongRunningTask 17072129
 
 #end tests
 
