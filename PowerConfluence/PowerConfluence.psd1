@@ -24,7 +24,7 @@ GUID = '6e741953-480d-44fb-9e1c-117f0747cca1'
 Author = 'Justin Mead'
 
 # Company or vendor of this module
-CompanyName = 'Unknown'
+CompanyName = 'ender2021'
 
 # Copyright statement for this module
 Copyright = '(c) Justin Mead. All rights reserved.'
@@ -95,13 +95,13 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = @("Confluence","Atlassian","REST API")
 
         # A URL to the license for this module.
         # LicenseUri = ''
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/ender2021/PowerConfluence'
 
         # A URL to an icon representing this module.
         # IconUri = ''
