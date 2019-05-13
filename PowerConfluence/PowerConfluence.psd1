@@ -95,7 +95,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @("Confluence","Atlassian","REST API")
+        Tags = @("Confluence","Atlassian","REST")
 
         # A URL to the license for this module.
         # LicenseUri = ''
