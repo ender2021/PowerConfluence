@@ -1,11 +1,31 @@
-function Format-ConfluenceStatusMacro($Color,$Text,[switch]$OutlineStyle)
-{
-    $params = @{
-        colour = $Color
-        title = $Text
-    }
-    if ($OutlineStyle) {$params.Add("subtle","true")}
+function Format-ConfluenceStatusMacro {
+    [CmdletBinding()]
+    param (
+        # Color to make the macro
+        [Parameter(Mandatory,Position=0)]
+        [string]
+        $Color,
+
+        # The text to display
+        [Parameter(Mandatory,Position=1)]
+        [string]
+        $Text,
+
+        # Set this flag to use outline style instead of the filled in style
+        [Parameter()]
+        [switch]
+        $OutlineStyle
+    )
     
-    $macro = $global:PowerConfluence.Macros.Status
-    Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents (Format-ConfluenceMacroParameters -Parameters $params)
+    begin {
+        
+    }
+    
+    process {
+        (New-Object PowerConfluenceStatusMacro @($Color,$Text,$OutlineStyle)).Render()
+    }
+    
+    end {
+        
+    }
 }

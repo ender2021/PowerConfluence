@@ -1,12 +1,41 @@
-function Format-ConfluencePagePropertiesReportMacro($Cql,$PageSize,$FirstColumn="",$Headings="",$SortBy="") {
-    $params = @{
-        cql = $Cql
-        pageSize = $PageSize
+function Format-ConfluencePagePropertiesReportMacro {
+    [CmdletBinding()]
+    param (
+        # Cql
+        [Parameter(Mandatory,Position=0)]
+        [string]
+        $Cql,
+
+        # Page size
+        [Parameter(Position=1)]
+        [int]
+        $PageSize = 30,
+
+        # First column
+        [Parameter(Position=2)]
+        [string]
+        $FirstColumn,
+
+        # Headings
+        [Parameter(Position=3)]
+        [string]
+        $Headings,
+
+        # Sort by
+        [Parameter(Position=4)]
+        [string]
+        $SortBy
+    )
+    
+    begin {
+        
     }
-    if ($FirstColumn -ne "") {$params.Add("firstcolumn",$FirstColumn)}
-    if ($Headings -ne "") {$params.Add("headings",$Headings)}
-    if ($SortBy -ne "") {$params.Add("sortBy",$SortBy)}
-	
-    $macro = $global:PowerConfluence.Macros.PagePropertiesReport
-    Format-ConfluenceMacro -Name $macro.Name -SchemaVersion $macro.SchemaVersion -Contents (Format-ConfluenceMacroParameters -Parameters $params)
+    
+    process {
+        (New-Object PowerConfluencePagePropertiesReportMacro @($Cql,$PageSize,$FirstColumn,$Headings,$SortBy)).Render()
+    }
+    
+    end {
+        
+    }
 }
