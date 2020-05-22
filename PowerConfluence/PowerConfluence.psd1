@@ -52,7 +52,13 @@ PowerShellVersion = '6.1'
 # ProcessorArchitecture = ''
 
 # Modules that must be imported into the global environment prior to importing this module
-# RequiredModules = @()
+RequiredModules = @(
+    @{
+        ModuleName = "PowerAtlassianCore"; 
+        ModuleVersion = "1.0.1"; 
+        Guid = "8c8e5bd1-90b8-4efb-9ca4-aeebb62aa527"
+    }
+)
 
 # Assemblies that must be loaded prior to importing this module
 # RequiredAssemblies = @()
@@ -99,7 +105,7 @@ PrivateData = @{
         Tags = @("Confluence","Atlassian","REST")
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/ender2021/PowerConfluence/license.md'
 
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/ender2021/PowerConfluence'
