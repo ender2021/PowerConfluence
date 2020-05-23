@@ -1,4 +1,7 @@
-using module .\classes\PowerConfluenceGlobal.psm1
+using module .\classes\html\ConfluenceHtmlTable.psm1
+using module .\classes\html\ConfluenceHtmlTableCell.psm1
+using module .\classes\html\ConfluenceHtmlTableRow.psm1
+using module .\classes\html\ConfluenceHtmlTag.psm1
 using module .\classes\macros\PowerConfluenceMacro.psm1
 using module .\classes\macros\PowerConfluenceMessageBoxMacro.psm1
 using module .\classes\macros\PowerConfluencePagePropertiesMacro.psm1
@@ -14,12 +17,8 @@ if(@($publicFiles).Count -gt 0) { $publicFiles.FullName | ForEach-Object { . $_ 
 
 Export-ModuleMember -Function $publicFiles.BaseName
 
-if($null -eq $global:PowerConfluence) {
-	$global:PowerConfluence = New-Object PowerConfluenceGlobal @($Emoticons,$Templates)
-}
-
 $onRemove = {
-	Remove-Variable -Name PowerConfluence -Scope global
+	
 }
 
 $ExecutionContext.SessionState.Module.OnRemove += $onRemove
