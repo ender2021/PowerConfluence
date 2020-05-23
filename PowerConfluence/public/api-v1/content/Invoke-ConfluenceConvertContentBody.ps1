@@ -57,23 +57,22 @@ function Invoke-ConfluenceConvertContentBody {
         $results = @()
     }
     process {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/contentbody/convert/$ToFormat"
-            HttpMethod = "POST"
-            Query = @{
-                embeddedContentRender = IIF $EmbedRenderAtSave "version-at-save" "current"
-            }
-            Body = @{
-                value = $ContentBody
-                representation = $FromFormat
-            }
-        }
-        if($PSBoundParameters.ContainsKey("Expand")){$RestArgs.Query.Add("expand",$Expand -join ",")}
-        if($PSBoundParameters.ContainsKey("SpaceKey")){$RestArgs.Query.Add("spaceKeyContext",$SpaceKey)}
-        if($PSBoundParameters.ContainsKey("ContentId")){$RestArgs.Query.Add("contentIdContext",$ContentId)}
+        $functionPath = "/wiki/rest/api/contentbody/convert/$ToFormat"
+        $verb = "POST"
 
-        $results += Invoke-ConfluenceRestMethod @RestArgs
+        $query = New-PACRestMethodQueryParams @{
+            embeddedContentRender = IIF $EmbedRenderAtSave "version-at-save" "current"
+        }
+        $body = New-PACRestMethodJsonBody @{
+            value = $ContentBody
+            representation = $FromFormat
+        }
+        if($PSBoundParameters.ContainsKey("Expand")){$query.Add("expand",$Expand -join ",")}
+        if($PSBoundParameters.ContainsKey("SpaceKey")){$query.Add("spaceKeyContext",$SpaceKey)}
+        if($PSBoundParameters.ContainsKey("ContentId")){$query.Add("contentIdContext",$ContentId)}
+
+        $method = New-PACRestMethod $functionPath $verb $query $body
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
