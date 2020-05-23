@@ -33,7 +33,7 @@ function Invoke-ConfluenceGetSpace {
         $query = New-PACRestMethodQueryParams @{}
         if($PSBoundParameters.ContainsKey("Expand")){$query.Add("expand",$Expand -join ",")}
 
-        $method = New-PACRestMethod $functionPath $verb
+        $method = New-PACRestMethod $functionPath $verb $query
         $results += $method.Invoke($RequestContext)
     }
     end {

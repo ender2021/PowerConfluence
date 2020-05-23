@@ -80,8 +80,7 @@ function Invoke-ConfluenceGetSpaces {
         if($PSBoundParameters.ContainsKey("Favourite")){$query.Add("favourite", $Favourite)}
         if($PSBoundParameters.ContainsKey("FavouriteUserKey")){$query.Add("favouriteUserKey", $FavouriteUserKey)}
 
-
-        $method = New-PACRestMethod $functionPath $verb
+        $method = New-PACRestMethod $functionPath $verb $query
         $results += $method.Invoke($RequestContext)
     }
     end {

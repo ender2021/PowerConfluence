@@ -33,17 +33,16 @@ function Invoke-ConfluenceUpdateSpace {
         $results = @()
     }
     process {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/space/$Key"
-            HttpMethod = "PUT"
-            Body = @{}
-        }
-        if($PSBoundParameters.ContainsKey("Name")){$RestArgs.Body.Add("name",$Name)}
-        if($PSBoundParameters.ContainsKey("Description")){$RestArgs.Body.Add("description",@{plain=@{value=$Description;representation="plain"}})}
-        if($PSBoundParameters.ContainsKey("HomepageId")){$RestArgs.Body.Add("homepage",@{id=$HomepageId})}
+        $functionPath = "/wiki/rest/api/space/$Key"
+        $verb = "PUT"
 
-        $results += Invoke-ConfluenceRestMethod @RestArgs
+        $body = New-PACRestMethodJsonBody @{}
+        if($PSBoundParameters.ContainsKey("Name")){$body.Add("name",$Name)}
+        if($PSBoundParameters.ContainsKey("Description")){$body.Add("description",@{plain=@{value=$Description;representation="plain"}})}
+        if($PSBoundParameters.ContainsKey("HomepageId")){$body.Add("homepage",@{id=$HomepageId})}
+
+        $method = New-PACRestMethod $functionPath $verb $null $body
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
