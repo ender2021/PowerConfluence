@@ -8,10 +8,10 @@ function Invoke-ConfluenceDeleteSpace {
         [string]
         $Key,
 
-        # The ConfluenceConnection object to use for the request
-        [Parameter(Position=1)]
-        [hashtable]
-        $ConfluenceConnection
+        # The AtlassianContext object to use for the request (use New-AtlassianContext)
+        [Parameter()]
+        [object]
+        $RequestContext
     )
     begin {
         $results = @()

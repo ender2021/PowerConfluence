@@ -26,10 +26,10 @@ function Invoke-ConfluenceGetContentLabels {
         [int32]
         $MaxResults=200,
 
-        # The ConfluenceConnection object to use for the request
-        [Parameter(Position=4)]
-        [hashtable]
-        $ConfluenceConnection
+        # The AtlassianContext object to use for the request (use New-AtlassianContext)
+        [Parameter()]
+        [object]
+        $RequestContext
     )
     begin {
         $results = @()

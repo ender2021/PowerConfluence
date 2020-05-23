@@ -45,10 +45,10 @@ function Invoke-ConfluenceGetContentComments {
         [string[]]
         $Expand,
 
-        # The ConfluenceConnection object to use for the request
-        [Parameter(Position=6)]
-        [hashtable]
-        $ConfluenceConnection
+        # The AtlassianContext object to use for the request (use New-AtlassianContext)
+        [Parameter()]
+        [object]
+        $RequestContext
     )
     begin {
         $results = @()

@@ -19,10 +19,10 @@ function Invoke-ConfluenceAddContentLabels {
         [string]
         $Scope="global",
 
-        # The ConfluenceConnection object to use for the request
+        # The AtlassianContext object to use for the request (use New-AtlassianContext)
         [Parameter()]
-        [hashtable]
-        $ConfluenceConnection
+        [object]
+        $RequestContext
     )
     begin {
         $results = @()
