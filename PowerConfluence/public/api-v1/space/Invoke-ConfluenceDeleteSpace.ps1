@@ -17,13 +17,11 @@ function Invoke-ConfluenceDeleteSpace {
         $results = @()
     }
     process {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/space/$Key"
-            HttpMethod = "DELETE"
-        }
+        $functionPath = "/wiki/rest/api/space/$Key"
+        $verb = "DELETE"
 
-        $results += Invoke-ConfluenceRestMethod @RestArgs
+        $method = New-PACRestMethod $functionPath $verb
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
