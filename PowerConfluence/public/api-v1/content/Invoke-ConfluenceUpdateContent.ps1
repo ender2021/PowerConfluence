@@ -64,7 +64,7 @@ function Invoke-ConfluenceUpdateContent {
 
         $version = IIF ($PSCmdlet.ParameterSetName -eq "VersionNumber") $VersionNum $VersionObj.number
 
-        $body=@{
+        $body = New-PACRestMethodJsonBody @{
             type = $Type
             title = $Title
             status = $Status
@@ -73,7 +73,8 @@ function Invoke-ConfluenceUpdateContent {
         if($PSBoundParameters.ContainsKey("ContentBody")){$body.Add("body",$ContentBody)}
         if($PSBoundParameters.ContainsKey("ParentId")){$body.Add("ancestors",@{id=$ParentId})}
 
-        $results += Invoke-ConfluenceRestMethod $ConfluenceConnection $functionPath $verb -Body $body
+        $method = New-PACRestMethod $functionPath $verb $null $body
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
