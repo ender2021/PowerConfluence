@@ -2,13 +2,13 @@ $ConfluenceSpaceExpand = @("settings","metadata.labels","operations","lookAndFee
                            "permissions","icon","description.plain","description.view"
                            "theme","homepage")
 
-#https://developer.atlassian.com/cloud/confluence/rest/#api-settings-theme-themeKey-get
+#https://developer.atlassian.com/cloud/confluence/rest/#api-api-space-get
 function Invoke-ConfluenceGetSpaces {
     [CmdletBinding()]
     param (
         # Space keys of specific spaces to return
         [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
-        [Alias("Key","Keys")]
+        [Alias("Keys")]
         [string[]]
         $SpaceKeys,
 
@@ -62,31 +62,29 @@ function Invoke-ConfluenceGetSpaces {
         $RequestContext
     )
     begin {
-        $keys = @()
+        $results = @()
     }
     process {
-        if ($SpaceKeys.Count -gt 0) {
-           $keys += $SpaceKeys | ForEach-Object {Format-QueryKvp "spaceKey" $_}
+        $functionPath = "/wiki/rest/api/space"
+        $verb = "GET"
+
+        $query = New-PACRestMethodQueryParams @{
+            start = $StartAt
+            limit = $MaxResults
         }
+        $SpaceKeys | ForEach-Object { $query.Add("spaceKey", $_) }
+        if($PSBoundParameters.ContainsKey("Expand")){$query.Add("expand", ($Expand -join ","))}
+        if($PSBoundParameters.ContainsKey("Type")){$query.Add("type", $Type)}
+        if($PSBoundParameters.ContainsKey("Status")){$query.Add("status", $Status)}
+        if($PSBoundParameters.ContainsKey("Labels")){$query.Add("label", ($Labels -join ","))}
+        if($PSBoundParameters.ContainsKey("Favourite")){$query.Add("favourite", $Favourite)}
+        if($PSBoundParameters.ContainsKey("FavouriteUserKey")){$query.Add("favouriteUserKey", $FavouriteUserKey)}
+
+
+        $method = New-PACRestMethod $functionPath $verb
+        $results += $method.Invoke($RequestContext)
     }
     end {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/space"
-            HttpMethod = "GET"
-            QueryKvp = @(
-                Format-QueryKvp "start" $StartAt
-                Format-QueryKvp "limit" $MaxResults
-            )
-        }
-        if($keys.Count -gt 0) {$RestArgs.QueryKvp += $keys}
-        if($PSBoundParameters.ContainsKey("Expand")){$RestArgs.QueryKvp += Format-QueryKvp "expand" ($Expand -join ",")}
-        if($PSBoundParameters.ContainsKey("Type")){$RestArgs.QueryKvp += Format-QueryKvp "type" $Type}
-        if($PSBoundParameters.ContainsKey("Status")){$RestArgs.QueryKvp += Format-QueryKvp "status" $Status}
-        if($PSBoundParameters.ContainsKey("Labels")){$RestArgs.QueryKvp += Format-QueryKvp "label" ($Labels -join ",")}
-        if($PSBoundParameters.ContainsKey("Favourite")){$RestArgs.QueryKvp += Format-QueryKvp "favourite" $Favourite}
-        if($PSBoundParameters.ContainsKey("FavouriteUserKey")){$RestArgs.QueryKvp += Format-QueryKvp "favouriteUserKey" $FavouriteUserKey}
-
-        Invoke-ConfluenceRestMethod @RestArgs
+        $results
     }
 }
