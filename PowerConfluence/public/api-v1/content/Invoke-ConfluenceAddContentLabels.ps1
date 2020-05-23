@@ -36,7 +36,8 @@ function Invoke-ConfluenceAddContentLabels {
             
         $literalBody = ConvertTo-Json $body -Compress
 
-        $results += Invoke-ConfluenceRestMethod $ConfluenceConnection $functionPath $verb -LiteralBody $literalBody
+        $method = New-PACRestMethod $functionPath $verb -Body (New-PACRestMethodBody $literalBody)
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
