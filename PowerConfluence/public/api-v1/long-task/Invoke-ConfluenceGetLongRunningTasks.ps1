@@ -23,17 +23,16 @@ function Invoke-ConfluenceGetLongRunningTasks {
         $results = @()
     }
     process {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/longtask"
-            HttpMethod = "GET"
-            Query = @{
-                start = $StartAt
-                limit = $MaxResults
-            }
+        $functionPath = "/wiki/rest/api/longtask"
+        $verb = "GET"
+
+        $query = New-PACRestMethodQueryParams @{
+            start = $StartAt
+            limit = $MaxResults
         }
 
-        $results += Invoke-ConfluenceRestMethod @RestArgs
+        $method = New-PACRestMethod $functionPath $verb $query
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
