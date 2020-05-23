@@ -56,7 +56,7 @@ function Invoke-ConfluenceGetContentById {
         $functionPath = "/wiki/rest/api/content/$Id"
         $verb = "GET"
 
-        $query=@{
+        $query = New-PACRestMethodQueryParams @{
             status = $Status
             embeddedContentRender = IIF $EmbedRenderAtSave "version-at-save" "current"
         }
@@ -64,7 +64,8 @@ function Invoke-ConfluenceGetContentById {
         if($PSBoundParameters.ContainsKey("Expand")){$query.Add("expand",$Expand -join ",")}
         if($TriggerView){$query.Add("trigger","viewed")}
 
-        $results += Invoke-ConfluenceRestMethod $ConfluenceConnection $functionPath $verb -Query $query
+        $method = New-PACRestMethod $functionPath $verb $query
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
