@@ -32,7 +32,7 @@ function Format-ConfluencePagePropertiesReportMacro {
     }
     
     process {
-        (New-Object PowerConfluencePagePropertiesReportMacro @($Cql,$PageSize,$FirstColumn,$Headings,$SortBy)).Render()
+        (New-Object PowerConfluencePagePropertiesReportMacro @($Cql,$PageSize,$FirstColumn,$Headings,$SortBy)).ToString()
     }
     
     end {

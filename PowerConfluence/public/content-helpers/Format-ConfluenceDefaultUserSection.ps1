@@ -3,16 +3,16 @@ function Format-ConfluenceDefaultUserSection() {
     $sectionContents = @()
     
     # section header
-    $sectionContents += (Format-ConfluenceHtml -Tag "h1" -Contents "Additional Notes")
+    $sectionContents += (New-ConfluenceHtmlTag -Tag "h1" -Contents "Additional Notes").ToString()
     
     # build the tip macro
     $title = "Editable Section"
-    $body = Format-ConfluenceHtml -Tag "p" -Contents "You may edit anything below this panel!"
+    $body = (New-ConfluenceHtmlTag -Tag "p" -Contents "You may edit anything below this panel!").ToString()
 
     $sectionContents += Format-ConfluenceMessageBoxMacro (Get-ConfluenceMessageBoxTypes).Tip $body $title
     
     # section body
-    $sectionContents += (Format-ConfluenceHtml -Tag "p" -Contents "No notes yet!")
+    $sectionContents += (New-ConfluenceHtmlTag -Tag "p" -Contents "No notes yet!").ToString()
     
     # done
     Format-ConfluenceSection -Contents (Format-ConfluenceCell -Contents $sectionContents)

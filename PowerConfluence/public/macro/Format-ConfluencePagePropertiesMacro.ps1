@@ -14,11 +14,15 @@ function Format-ConfluencePagePropertiesMacro {
     process {
         $propertyRows = @()
         foreach ($prop in $Properties) {
-            $propertyRows += (Format-ConfluenceHtmlTableRow -Cells (@{Type="th";Contents=$prop.Keys[0]},@{Type="td";Contents=$prop.Values[0]}))
+            $cells = @(
+                New-ConfluenceHtmlTableCell -Contents $prop.Keys[0] -Header
+                New-ConfluenceHtmlTableCell -Contents $prop.Value[0]
+            )
+            $propertyRows += New-ConfluenceHtmlTableRow -Cells $Cells
         }
-        $propTable = (Format-ConfluenceHtmlTable -Rows $propertyRows)
+        $propTable = (New-ConfluenceHtmlTable -Rows $propertyRows).ToString()
 
-        (New-Object PowerConfluencePagePropertiesMacro @($propTable)).Render()
+        (New-Object PowerConfluencePagePropertiesMacro @($propTable)).ToString()
     }
     
     end {

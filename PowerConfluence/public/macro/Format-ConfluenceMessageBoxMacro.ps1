@@ -28,7 +28,7 @@ function Format-ConfluenceMessageBoxMacro {
     }
     
     process {
-        (New-Object PowerConfluenceMessageBoxMacro @($Type, $MessageBody, $Title, !$HideIcon)).Render()
+        (New-Object PowerConfluenceMessageBoxMacro @($Type, $MessageBody, $Title, !$HideIcon)).ToString()
     }
     
     end {

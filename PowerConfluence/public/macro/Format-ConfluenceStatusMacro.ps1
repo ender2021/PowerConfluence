@@ -22,7 +22,7 @@ function Format-ConfluenceStatusMacro {
     }
     
     process {
-        (New-Object PowerConfluenceStatusMacro @($Color,$Text,$OutlineStyle)).Render()
+        (New-Object PowerConfluenceStatusMacro @($Color,$Text,$OutlineStyle)).ToString()
     }
     
     end {

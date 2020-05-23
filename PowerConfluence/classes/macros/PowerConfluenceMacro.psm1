@@ -105,7 +105,7 @@ class PowerConfluenceMacro {
     }
 
     [string]
-    Render()
+    ToString()
     {
         $contents = @()
 
