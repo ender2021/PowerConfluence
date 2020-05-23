@@ -68,10 +68,10 @@ function Invoke-ConfluenceCreateContent {
         $functionPath = "/wiki/rest/api/content"
         $verb = "POST"
 
-        $query=@{}
+        $query = New-PACRestMethodQueryParams @{}
         if($PSBoundParameters.ContainsKey("Expand")){$query.Add("expand",$Expand -join ",")}
 
-        $body=@{
+        $body = New-PACRestMethodJsonBody @{
             space = @{key=$SpaceKey}
             type = $Type
             title = $Title
@@ -87,7 +87,8 @@ function Invoke-ConfluenceCreateContent {
         }
         if($PSBoundParameters.ContainsKey("Id")){$body.Add("id",$Id)}
 
-        $results += Invoke-ConfluenceRestMethod $ConfluenceConnection $functionPath $verb -Query $query -Body $body
+        $method = New-PACRestMethod $functionPath $verb $query $body
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
