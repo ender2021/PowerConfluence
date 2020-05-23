@@ -1,13 +1,3 @@
-using module .\classes\html\ConfluenceHtmlTable.psm1
-using module .\classes\html\ConfluenceHtmlTableCell.psm1
-using module .\classes\html\ConfluenceHtmlTableRow.psm1
-using module .\classes\html\ConfluenceHtmlTag.psm1
-using module .\classes\macros\PowerConfluenceMacro.psm1
-using module .\classes\macros\PowerConfluenceMessageBoxMacro.psm1
-using module .\classes\macros\PowerConfluencePagePropertiesMacro.psm1
-using module .\classes\macros\PowerConfluencePagePropertiesReportMacro.psm1
-using module .\classes\macros\PowerConfluenceStatusMacro.psm1
-
 # grab functions from files
 $privateFiles = Get-ChildItem -Path $PSScriptRoot\private -Recurse -Include *.ps1 -ErrorAction SilentlyContinue
 $publicFiles = Get-ChildItem -Path $PSScriptRoot\public -Recurse -Include *.ps1 -ErrorAction SilentlyContinue
