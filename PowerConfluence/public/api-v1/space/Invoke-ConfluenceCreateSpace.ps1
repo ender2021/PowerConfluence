@@ -33,19 +33,23 @@ function Invoke-ConfluenceCreateSpace {
         $results = @()
     }
     process {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/space"
-            HttpMethod = "POST"
-            Body = @{
-                key = $Key
-                name = $Name
-            }
-        }
-        if($PSBoundParameters.ContainsKey("Description")){$RestArgs.Body.Add("description",@{plain=@{value=$Description;representation="plain"}})}
-        #if($PSBoundParameters.ContainsKey("Permissions")){$RestArgs.Body.Add("permissions",$Permissions)}
+        $functionPath = "/wiki/rest/api/space"
+        $verb = "POST"
 
-        $results += Invoke-ConfluenceRestMethod @RestArgs
+        $query = New-PACRestMethodQueryParams @{
+            start = $StartAt
+            limit = $MaxResults
+        }
+
+        $body = New-RestMethodJsonBody @{
+            key = $Key
+            name = $Name
+        }
+        if($PSBoundParameters.ContainsKey("Description")){$body.Add("description",@{plain=@{value=$Description;representation="plain"}})}
+        #if($PSBoundParameters.ContainsKey("Permissions")){$body.Add("permissions",$Permissions)}
+
+        $method = New-PACRestMethod $functionPath $verb $query $body
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
