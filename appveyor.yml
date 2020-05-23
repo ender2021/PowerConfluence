@@ -1,7 +1,20 @@
-version: 0.0.{build}
+# See http://www.appveyor.com/docs/appveyor-yml for many more options
+
+#Publish to PowerShell Gallery with this key
 environment:
   NugetApiKey:
-    secure: JgK2cd5E+VAhFpQTTB8zT8H5hlC8jGSBk3F4Bn7jn4f6qVA5aH0yuMNbUppvJTt8
-build: off
+    secure: hyoDAc+SNswunjWFsy6v2L2XtzUUUGrl7TScui3o6xBgwAJb1p6l/0wW6q1ZykoF
+
+# Need the VS 2019 image b/c the rest all have a version of PowerShellGet that breaks
+image: Visual Studio 2019
+
+# Skip on updates to the readme.
+# We can force this by adding [skip ci] or [ci skip] anywhere in commit message 
+skip_commits:
+  message: /updated readme.*|update readme.*s/
+
+build: false
+
+#Kick off the CI/CD pipeline
 test_script:
-- pwsh: . .\build.ps1
+  - pwsh: . .\build.ps1
