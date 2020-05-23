@@ -1,4 +1,4 @@
-class PowerConfluenceGlobal {
+class PowerConfluenceFormattingGlobal {
 
     #####################
     # HIDDEN PROPERTIES #
@@ -20,7 +20,7 @@ class PowerConfluenceGlobal {
     # CONSTRUCTORS      #
     #####################
 
-    PowerConfluenceGlobal(
+    PowerConfluenceFormattingGlobal(
         [object[]] $Emoticons,
         [object[]] $Templates
     ) {
