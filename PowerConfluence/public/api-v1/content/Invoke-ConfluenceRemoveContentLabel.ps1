@@ -22,13 +22,11 @@ function Invoke-ConfluenceRemoveContentLabel {
         $results = @()
     }
     process {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/content/$ContentId/label/$Label"
-            HttpMethod = "DELETE"
-        }
+        $functionPath = "/wiki/rest/api/content/$ContentId/label/$Label"
+        $verb = "DELETE"
 
-        $results += Invoke-ConfluenceRestMethod @RestArgs
+        $method = New-PACRestMethod $functionPath $verb
+        $results += $method.Invoke($RequestContext)
     }
     end {
         #$results
