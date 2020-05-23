@@ -27,15 +27,14 @@ function Invoke-ConfluenceGetSpace {
         $results = @()
     }
     process {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/space/$SpaceKey"
-            HttpMethod = "GET"
-            Query = @{}
-        }
-        if($PSBoundParameters.ContainsKey("Expand")){$RestArgs.Query.Add("expand",$Expand -join ",")}
+        $functionPath = "/wiki/rest/api/space/$SpaceKey"
+        $verb = "GET"
 
-        $results += Invoke-ConfluenceRestMethod @RestArgs
+        $query = New-PACRestMethodQueryParams @{}
+        if($PSBoundParameters.ContainsKey("Expand")){$query.Add("expand",$Expand -join ",")}
+
+        $method = New-PACRestMethod $functionPath $verb
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
