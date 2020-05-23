@@ -20,7 +20,4 @@ $Templates = @{
         TaskList = '<ac:task-list>{0}</ac:task-list>'
         Task = '<ac:task><ac:task-id>{0}</ac:task-id><ac:task-status>{1}</ac:task-status><ac:task-body><span class="placeholder-inline-tasks">{2}</span></ac:task-body></ac:task>'
     }
-    Html = @{
-        RelativeTable = '<table class="relative-table"><tbody>{0}</tbody></table>'
-    }
 }
