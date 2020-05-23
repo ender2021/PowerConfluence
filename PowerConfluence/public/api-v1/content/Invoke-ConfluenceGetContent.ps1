@@ -82,7 +82,7 @@ function Invoke-ConfluenceGetContent {
         $functionPath = "/wiki/rest/api/content"
         $verb = "GET"
 
-        $query=@{
+        $query = New-PACRestMethodQueryParams @{
             type = IIF $Blog "blogpost" "page"
             status = (IIF $AllStatuses "any" "current")
             start = $StartAt
@@ -95,7 +95,8 @@ function Invoke-ConfluenceGetContent {
         if($PSBoundParameters.ContainsKey("OrderBy")){$query.Add("orderBy",$OrderBy)}
         if($TriggerView) {$query.Add("trigger","viewed")}
 
-        $results += Invoke-ConfluenceRestMethod $ConfluenceConnection $functionPath $verb -Query $query
+        $method = New-PACRestMethod $functionPath $verb $query
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
