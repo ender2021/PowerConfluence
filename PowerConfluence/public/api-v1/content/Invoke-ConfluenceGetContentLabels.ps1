@@ -35,18 +35,17 @@ function Invoke-ConfluenceGetContentLabels {
         $results = @()
     }
     process {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/content/$ContentId/label"
-            HttpMethod = "GET"
-            Query = @{
-                start = $StartAt
-                limit = $MaxResults
-            }
-        }
-        if($PSBoundParameters.ContainsKey("Scope")){$RestArgs.Query.Add("prefix",$Scope)}
+        $functionPath = "/wiki/rest/api/content/$ContentId/label"
+        $verb = "GET"
 
-        $results += Invoke-ConfluenceRestMethod @RestArgs
+        $query = New-PACRestMethodQueryParams @{
+            start = $StartAt
+            limit = $MaxResults
+        }
+        if($PSBoundParameters.ContainsKey("Scope")){$query.Add("prefix",$Scope)}
+
+        $method = New-PACRestMethod $functionPath $verb $query
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
