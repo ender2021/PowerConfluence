@@ -22,15 +22,14 @@ function Invoke-ConfluenceDeleteContent {
         $results = @()
     }
     process {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/content/$ContentId"
-            HttpMethod = "DELETE"
-            Query = @{}
-        }
-        if ($Purge) {$RestArgs.Query.Add("status","trashed")}
+        $functionPath = "/wiki/rest/api/content/$ContentId"
+        $verb = IIF "DELETE"
 
-        $results += Invoke-ConfluenceRestMethod @RestArgs
+        $query = New-PACRestMethodQueryParams @{}
+        if ($Purge) {$query.Add("status","trashed")}
+
+        $method = New-PACRestMethod $functionPath $verb $query
+        $results += $method.Invoke($RequestContext)
     }
     end {
         #$results
