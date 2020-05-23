@@ -54,20 +54,19 @@ function Invoke-ConfluenceGetContentComments {
         $results = @()
     }
     process {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/content/$ContentId/child/comment"
-            HttpMethod = "GET"
-            Query = @{
-                start = $StartAt
-                limit = $MaxResults
-            }
-        }
-        if($PSBoundParameters.ContainsKey("Expand")){$RestArgs.Query.Add("expand",$Expand -join ",")}
-        if($PSBoundParameters.ContainsKey("CurrentVersion")){$RestArgs.Query.Add("parentVersion",$CurrentVersion)}
-        if($PSBoundParameters.ContainsKey("Location")){$RestArgs.Query.Add("location",$Location)}
+        $functionPath = "/wiki/rest/api/content/$ContentId/child/comment"
+        $verb = "GET"
 
-        $results += Invoke-ConfluenceRestMethod @RestArgs
+        $query = New-PACRestMethodQueryParams @{
+            start = $StartAt
+            limit = $MaxResults
+        }
+        if($PSBoundParameters.ContainsKey("Expand")){$query.Add("expand",$Expand -join ",")}
+        if($PSBoundParameters.ContainsKey("CurrentVersion")){$query.Add("parentVersion",$CurrentVersion)}
+        if($PSBoundParameters.ContainsKey("Location")){$query.Add("location",$Location)}
+
+        $method = New-PACRestMethod $functionPath $verb $query
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
