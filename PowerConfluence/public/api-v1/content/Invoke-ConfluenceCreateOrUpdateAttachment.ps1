@@ -43,21 +43,21 @@ function Invoke-ConfluenceCreateOrUpdateAttachment {
         $results = @()
     }
     process {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/content/$ContentId/child/attachment"
-            HttpMethod = IIF $ForceCreate "POST" "PUT"
-            Query = @{
-                status = $Status
-            }
-            Form = @{
-                file = $Attachment
-                minorEdit = $MinorEdit
-            }
-        }
-        if($PSBoundParameters.ContainsKey("Comment")){$RestArgs.Form.Add("comment",$Comment)}
+        $functionPath = "/wiki/rest/api/content/$ContentId/child/attachment"
+        $verb = IIF $ForceCreate "POST" "PUT"
 
-        $results += Invoke-ConfluenceRestMethod @RestArgs
+        $query = New-PACRestMethodQueryParams @{
+            status = $Status
+        }
+
+        $body = @{
+            file = $Attachment
+            minorEdit = $MinorEdit
+        }
+        if($PSBoundParameters.ContainsKey("Comment")){$body.Add("comment",$Comment)}
+
+        $method = New-PACRestMethod $functionPath $verb $query $body
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
