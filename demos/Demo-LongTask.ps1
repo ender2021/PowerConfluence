@@ -1,5 +1,5 @@
 #import PowerConfluence
-Import-Module (Join-Path -Path $PSScriptRoot -ChildPath \..\PowerConfluence\PowerConfluence.psm1) -Force
+Import-Module (Join-Path -Path $PSScriptRoot -ChildPath \..\PowerConfluence\PowerConfluence.psd1) -Force
 
 #import the variable $ConfluenceCredentials
 Import-Module (Join-Path -Path $PSScriptRoot -ChildPath \credentials\Credentials.psm1) -Force
@@ -10,10 +10,10 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #do tests here
 
 #GET LONG RUNNING TASKS
-#(Invoke-ConfluenceGetLongRunningTasks).results
+#Invoke-ConfluenceGetLongRunningTasks
 
 #GET LONG RUNNING TASK
-#Invoke-ConfluenceGetLongRunningTask 17072129
+#Invoke-ConfluenceGetLongRunningTask 332595215
 
 #end tests
 

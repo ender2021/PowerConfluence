@@ -1,4 +1,4 @@
-#https://developer.atlassian.com/cloud/confluence/rest/#api-space-post
+#https://developer.atlassian.com/cloud/confluence/rest/#api-api-space-post
 function Invoke-ConfluenceCreateSpace {
     [CmdletBinding()]
     param (
@@ -36,19 +36,14 @@ function Invoke-ConfluenceCreateSpace {
         $functionPath = "/wiki/rest/api/space"
         $verb = "POST"
 
-        $query = New-PACRestMethodQueryParams @{
-            start = $StartAt
-            limit = $MaxResults
-        }
-
-        $body = New-RestMethodJsonBody @{
+        $body = New-PACRestMethodJsonBody @{
             key = $Key
             name = $Name
         }
         if($PSBoundParameters.ContainsKey("Description")){$body.Add("description",@{plain=@{value=$Description;representation="plain"}})}
         #if($PSBoundParameters.ContainsKey("Permissions")){$body.Add("permissions",$Permissions)}
 
-        $method = New-PACRestMethod $functionPath $verb $query $body
+        $method = New-PACRestMethod $functionPath $verb $null $body
         $results += $method.Invoke($RequestContext)
     }
     end {

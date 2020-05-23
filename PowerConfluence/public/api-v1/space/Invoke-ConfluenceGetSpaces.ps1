@@ -72,7 +72,7 @@ function Invoke-ConfluenceGetSpaces {
             start = $StartAt
             limit = $MaxResults
         }
-        $SpaceKeys | ForEach-Object { $query.Add("spaceKey", $_) }
+        if($null -ne $SpaceKeys -and $SpaceKeys.Count -gt 0) { $SpaceKeys | ForEach-Object { $query.Add("spaceKey", $_) } }
         if($PSBoundParameters.ContainsKey("Expand")){$query.Add("expand", ($Expand -join ","))}
         if($PSBoundParameters.ContainsKey("Type")){$query.Add("type", $Type)}
         if($PSBoundParameters.ContainsKey("Status")){$query.Add("status", $Status)}

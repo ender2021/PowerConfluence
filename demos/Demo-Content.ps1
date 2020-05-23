@@ -1,5 +1,5 @@
 #import PowerConfluence
-Import-Module (Join-Path -Path $PSScriptRoot -ChildPath \..\PowerConfluence\PowerConfluence.psm1) -Force
+Import-Module (Join-Path -Path $PSScriptRoot -ChildPath \..\PowerConfluence\PowerConfluence.psd1) -Force
 
 #import the variable $ConfluenceCredentials
 Import-Module (Join-Path -Path $PSScriptRoot -ChildPath \credentials\Credentials.psm1) -Force
@@ -10,14 +10,14 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #do tests here
 
 #ADD LABELS TO CONTENT
-#17137665 | Invoke-ConfluenceAddLabelsToContent -Label "test2"
-#@("test3","test4") | Invoke-ConfluenceAddLabelsToContent 755826903
+#332595201 | Invoke-ConfluenceAddContentLabels -Label "test2"
+#@("test3","test4") | Invoke-ConfluenceAddContentLabels 755826903
 
 #GET CONTENT
-#Invoke-ConfluenceGetContent "Test Page" "~justin.mead"
+#Invoke-ConfluenceGetContent "Test Page" "JPT"
 
 #GET CONTENT BY ID
-#Invoke-ConfluenceGetContentById 755826903
+#Invoke-ConfluenceGetContentById 332595201
 #@(755826903,747111944) | Invoke-ConfluenceGetContentById
 
 #CREATE CONTENT
@@ -25,35 +25,35 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #Invoke-ConfluenceCreateContent JPT "comment title" (New-ConfluenceContentBody "this is a comment") -Type "comment" -ParentId 17137665
 
 #UPDATE CONTENT
-#Invoke-ConfluenceGetContentById 755794103 | ForEach-Object {$_.title += " (Edited)";$_} | Invoke-ConfluenceUpdateContent
+#Invoke-ConfluenceGetContentById 332595201 | ForEach-Object {$_.title += " (Edited)";$_} | Invoke-ConfluenceUpdateContent
 
 #CREATE OR UPDATE ATTACHMENT
-#Get-Item $PSScriptRoot\SampleAttachment* | Invoke-ConfluenceCreateOrUpdateAttachment 17137665
+#Get-Item $PSScriptRoot\SampleAttachment* | Invoke-ConfluenceCreateOrUpdateAttachment 332595201
 #Get-Item $PSScriptRoot\SampleAttachment* | Invoke-ConfluenceCreateOrUpdateAttachment 17137665 -ForceCreate
 
 #DELETE CONTENT
-#17006719 | Invoke-ConfluenceDeleteContent
+#332595201 | Invoke-ConfluenceDeleteContent
 
 #GET CONTENT CHILDREN
-#(Invoke-ConfluenceGetContentChildren 17137665 -Expand "attachment").attachment
+#(Invoke-ConfluenceGetContentChildren 332595201 -Expand "attachment").attachment
 
 #GET CONTENT LABELS
-#Invoke-ConfluenceGetContentLabels 17137665
+#Invoke-ConfluenceGetContentLabels 332595201
 
 #GET ATTACHMENTS
-#Invoke-ConfluenceGetAttachments 17137665
+#Invoke-ConfluenceGetAttachments 332595201
 
 #GET CONTENT COMMENTS
-#Invoke-ConfluenceGetContentComments 17137665
+#Invoke-ConfluenceGetContentComments 332595201
 
 #REMOVE CONTENT LABEL
-#"test2" | Invoke-ConfluenceRemoveContentLabel 17137665
+#"test2" | Invoke-ConfluenceRemoveContentLabel 332595201
 
 #CONVERT CONTENT BODY
 #Invoke-ConfluenceConvertContentBody "my unwrapped content" -FromFormat "wiki" -ToFormat "storage"
-$content = (Get-Content $PSScriptRoot\markup.txt) -join "" #
-$value = $content -replace [char]0x00a0,'-' | Invoke-ConfluenceConvertContentBody -FromFormat "wiki" -ToFormat "storage"
-$value
+# $content = (Get-Content $PSScriptRoot\markup.txt) -join "" #
+# $value = $content -replace [char]0x00a0,'-' | Invoke-ConfluenceConvertContentBody -FromFormat "wiki" -ToFormat "storage"
+# $value
 
 #end tests
 

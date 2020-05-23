@@ -1,5 +1,5 @@
 #import PowerConfluence
-Import-Module (Join-Path -Path $PSScriptRoot -ChildPath \..\PowerConfluence\PowerConfluence.psm1) -Force
+Import-Module (Join-Path -Path $PSScriptRoot -ChildPath \..\PowerConfluence\PowerConfluence.psd1) -Force
 
 #import the variable $ConfluenceCredentials
 Import-Module (Join-Path -Path $PSScriptRoot -ChildPath \credentials\Credentials.psm1) -Force
@@ -19,13 +19,13 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #@("GA","CR","GCCW") | Invoke-ConfluenceGetSpace
 
 #CREATE SPACE
-#Invoke-ConfluenceCreateSpace "JPT" "Justin Powershell Testing" "A space where justin tests some powershell stuff"
+#Invoke-ConfluenceCreateSpace "TTSFD" "Temporary Test Space For Deletion" "A space where justin tests some powershell stuff"
 
 #UPDATE SPACE
-#Invoke-ConfluenceUpdateSpace "JPT" "Justin's PowerShell Testing"
+#Invoke-ConfluenceUpdateSpace "TTSFD" "Temporary Test Space For Deletion (Name Updated)"
 
 #DELETE SPACE
-#"JPT" | Invoke-ConfluenceDeleteSpace
+#"TTSFD" | Invoke-ConfluenceDeleteSpace
 
 #end tests
 
