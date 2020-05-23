@@ -53,20 +53,19 @@ function Invoke-ConfluenceGetAttachments {
         $results = @()
     }
     process {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/content/$ContentId/child/attachment"
-            HttpMethod = "GET"
-            Query = @{
-                start = $StartAt
-                limit = $MaxResults
-            }
-        }
-        if($PSBoundParameters.ContainsKey("MediaType")){$RestArgs.Query.Add("mediaType",$MediaType)}
-        if($PSBoundParameters.ContainsKey("FileName")){$RestArgs.Query.Add("filename",$FileName)}
-        if($PSBoundParameters.ContainsKey("Expand")){$RestArgs.Query.Add("expand",$Expand -join ",")}
+        $functionPath = "/wiki/rest/api/content/$ContentId/child/attachment"
+        $verb = "GET"
 
-        $results += Invoke-ConfluenceRestMethod @RestArgs
+        $query = New-PACRestMethodQueryParams @{
+            start = $StartAt
+            limit = $MaxResults
+        }
+        if($PSBoundParameters.ContainsKey("MediaType")){$query.Add("mediaType",$MediaType)}
+        if($PSBoundParameters.ContainsKey("FileName")){$query.Add("filename",$FileName)}
+        if($PSBoundParameters.ContainsKey("Expand")){$query.Add("expand",$Expand -join ",")}
+
+        $method = New-PACRestMethod $functionPath $verb $query
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results

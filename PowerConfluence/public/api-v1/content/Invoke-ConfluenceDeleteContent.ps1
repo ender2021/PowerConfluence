@@ -23,7 +23,7 @@ function Invoke-ConfluenceDeleteContent {
     }
     process {
         $functionPath = "/wiki/rest/api/content/$ContentId"
-        $verb = IIF "DELETE"
+        $verb = "DELETE"
 
         $query = New-PACRestMethodQueryParams @{}
         if ($Purge) {$query.Add("status","trashed")}
