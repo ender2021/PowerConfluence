@@ -31,16 +31,15 @@ function Invoke-ConfluenceGetContentChildren {
         $results = @()
     }
     process {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/content/$ContentId/child"
-            HttpMethod = "GET"
-            Query = @{}
-        }
-        if($PSBoundParameters.ContainsKey("Expand")){$RestArgs.Query.Add("expand",$Expand -join ",")}
-        if($PSBoundParameters.ContainsKey("CurrentVersion")){$RestArgs.Query.Add("parentVersion",$CurrentVersion)}
+        $functionPath = "/wiki/rest/api/content/$ContentId/child"
+        $verb = "GET"
 
-        $results += Invoke-ConfluenceRestMethod @RestArgs
+        $query = New-PACRestMethodQueryParams @{}
+        if($PSBoundParameters.ContainsKey("Expand")){$query.Add("expand",$Expand -join ",")}
+        if($PSBoundParameters.ContainsKey("CurrentVersion")){$query.Add("parentVersion",$CurrentVersion)}
+
+        $method = New-PACRestMethod $functionPath $verb $query
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
