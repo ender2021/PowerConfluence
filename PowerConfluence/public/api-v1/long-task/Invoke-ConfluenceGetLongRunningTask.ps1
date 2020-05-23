@@ -17,13 +17,11 @@ function Invoke-ConfluenceGetLongRunningTask {
         $results = @()
     }
     process {
-        $RestArgs = @{
-            ConfluenceConnection = $ConfluenceConnection
-            FunctionPath = "/wiki/rest/api/longtask/$TaskId"
-            HttpMethod = "GET"
-        }
+        $functionPath = "/wiki/rest/api/longtask/$TaskId"
+        $verb = "GET"
 
-        $results += Invoke-ConfluenceRestMethod @RestArgs
+        $method = New-PACRestMethod $functionPath $verb
+        $results += $method.Invoke($RequestContext)
     }
     end {
         $results
