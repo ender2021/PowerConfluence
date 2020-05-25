@@ -15,6 +15,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #GET CURRENT USER
 #Invoke-ConfluenceGetCurrentUser
 
+#GET ANONYMOUS USER
+#Invoke-ConfluenceGetAnonymousUser
+
 #end tests
 
 #close the Confluence session
