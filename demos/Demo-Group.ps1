@@ -16,6 +16,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #GET GROUP
 #Invoke-ConfluenceGetGroup administrators
 
+#GET GROUP MEMBERS
+#(Invoke-ConfluenceGetGroupMembers confluence-users).results
+
 #end tests
 
 #close the Confluence session
