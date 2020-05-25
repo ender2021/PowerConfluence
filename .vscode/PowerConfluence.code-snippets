@@ -19,34 +19,40 @@
 		"scope":"powershell",
 		"prefix":"iccmdlet",
 		"body" : [
-			"#",
+			"\\#",
 			"function Invoke-Confluence$1 {",
 			"\t[CmdletBinding()]",
 			"\tparam (\n\n\n",
-			"\t\t# The ConfluenceConnection object to use for the request",
+			"\t\t# The AtlassianContext object to use for the request",
 			"\t\t[Parameter()]",
-			"\t\t[hashtable]",
-			"\t\t\\$ConfluenceConnection",
+			"\t\t[object]",
+			"\t\t\\$RequestContext",
 			"\t)",
 			"\tbegin {",
 			"\t\t\\$results = @()",
 			"\t}",
 			"\tprocess {",
-			"\t\t\\$RestArgs = @{",
-			"\t\t\tConfluenceConnection = \\$ConfluenceConnection",
-			"\t\t\tFunctionPath = \"\"",
-			"\t\t\tHttpMethod = \"\"",
-			"\t\t\tQuery = @{}",
-			"\t\t\tBody = @{}",
-			"\t\t}\n",
-			"\t\t\\$results += Invoke-ConfluenceRestMethod @RestArgs",
+			"\t\t\\$functionPath = \"\"",
+			"\t\t\\$verb = \"\"\n",
+			"\t\t\\$query = New-PACRestMethodQueryParams @{}\n",
+			"\t\t\\$body = New-PACRestMethodJsonBody @{}\n\n",
+			"\t\t\\$method = New-PACRestMethod \\$functionPath \\$verb \\$query \\$body",
+			"\t\t\\$results += $method.Invoke(\\$RequestContext)",
 			"\t}",
 			"\tend {",
 			"\t\t\\$results",
 			"\t}",
-			"}"
+			"}",
 		],
 		"description": "Snippet for templating a new Invoke-Confluence* API wrapper"
+	},
+	"Parameter Checker": {
+		"scope":"powershell",
+		"prefix":"checkparam",
+		"body" : [
+			"if(\\$PSBoundParameters.ContainsKey(\"${1}\")){\\${3}.Add(\"${2}\",\\$${1})}"
+		],
+		"description": "Snippet for adding an item to a hashtable if a named function parameter is set"
 	},
 	"breakpoint": {
 		"scope":"powershell",
@@ -55,5 +61,29 @@
 			"Read-Host -Prompt \"Press any key to continue or CTRL+C to quit\""
 		],
 		"description": "Insert a breakpoint"
+	},
+	"Basic powershell class snippet": {
+		"scope":"powershell",
+		"prefix": "pclass",
+		"body": [
+			"class $1 {\n",
+			"\t#####################",
+			"\t# HIDDEN PROPERTIES #",
+			"\t#####################\n\n\t\n",
+			"\t#####################",
+			"\t# PUBLIC PROPERTIES #",
+			"\t#####################\n\n\t\n",
+			"\t#####################",
+			"\t# CONSTRUCTORS      #",
+			"\t#####################\n\n\t\n",
+			"\t#####################",
+			"\t# HIDDEN METHODS    #",
+			"\t#####################\n\n\t\n",
+			"\t#####################",
+			"\t# PUBLIC METHODS    #",
+			"\t#####################\n\n\t\n",
+			"}"
+		],
+		"description": "Creates an outline of a class with comment sections for each member type"
 	}
 }
