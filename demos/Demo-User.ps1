@@ -12,6 +12,8 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #GET USER
 #Invoke-ConfluenceGetUser '557058:36b19b6f-d1af-4707-9e2d-dcce63f2231d' -Expand "operations"
 
+#GET CURRENT USER
+#Invoke-ConfluenceGetCurrentUser
 
 #end tests
 
