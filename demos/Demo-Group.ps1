@@ -10,8 +10,11 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #do tests here
 
 #GET GROUPS
-$groups = Invoke-ConfluenceGetGroups
-$groups.results
+# $groups = Invoke-ConfluenceGetGroups
+# $groups.results
+
+#GET GROUP
+#Invoke-ConfluenceGetGroup administrators
 
 #end tests
 
