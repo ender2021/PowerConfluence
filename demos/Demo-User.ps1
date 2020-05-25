@@ -18,6 +18,9 @@ Open-ConfluenceSession -UserName $ConfluenceCredentials.UserName -Password $Conf
 #GET ANONYMOUS USER
 #Invoke-ConfluenceGetAnonymousUser
 
+#GET USER GROUPS
+#Invoke-ConfluenceGetUserGroups '557058:36b19b6f-d1af-4707-9e2d-dcce63f2231d'
+
 #end tests
 
 #close the Confluence session
